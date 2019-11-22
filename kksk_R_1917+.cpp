@@ -12,10 +12,19 @@
 #include <iostream>
 #include <queue>
 using namespace std;
+
+// 0: Empty
+// 1:
+// -1:
+// 2: Arrow
 int grid[8][8] = {0};
+
+// DeltaX/Y of eight direction
 int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
 int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+
 int turns;
+// The parameter of calculating 'value' in formula
 // 调整参数 res=f1*t1+f2*t2+f3*c1+f4*c2+f5*m
 float f1[23] = {0.1080, 0.1080, 0.1235, 0.1332, 0.1400, 0.1468, 0.1565, 0.1720,
                 0.1949, 0.2217, 0.2476, 0.2680, 0.2800, 0.2884, 0.3000, 0.3208,
@@ -37,18 +46,28 @@ const int INF = INT16_MAX;
 const int GRIDSIZE = 8;
 const float firstadv = 0.2;  //先手优势（计算Territory时用到的参数k）
 struct Move {
-    int x0, y0, x1, y1, x2, y2;
-    float value;
+    int x0, y0, x1, y1, x2, y2;  // Coordinates
+    float value;                 // Value ... More Info Needed
 };
 inline bool inMap(int x, int y);
 void GetPos(int map[8][8], int color, int pos[4][2]);
 inline void ProcStep(Move a, int color, int temp_grid[8][8]);
 Move SearchStep(int color, int map[8][8]);
-void qmove(int color, int map[8][8],
-           int qd[8][8]);  //对某一个棋盘，计算某一方棋子的queenmove数
-void kmove(int color, int map[8][8],
-           int kd[8][8]);  //对某一个棋盘，计算某一方棋子的Kingmove数
+//对某一个棋盘，计算某一方棋子的queenmove数
+void qmove(int color, int map[8][8], int qd[8][8]);
+//对某一个棋盘，计算某一方棋子的Kingmove数
+void kmove(int color, int map[8][8], int kd[8][8]);
 float Evaluation(int color, int map[8][8]);
+/**
+ * @brief Use PVS algorithm to calculate value?
+ * @param color The color of placing Queen
+ * @param map   The grid
+ * @param alpha The minimum
+ * @param beta  The maximum
+ * @param depth The depth remainder
+ * @param d     ?
+ * @return The value.
+ */
 float PVS(int color, int map[8][8], float alpha, float beta, int depth, int d);
 inline int Pow2(int n);
 inline void StepBack(Move a, int color, int temp_grid[8][8]);
@@ -90,10 +109,8 @@ void GetPos(int map[8][8], int color, int pos[4][2]) {
         if (counter == 4) break;
     }
 }
-
-void kmove(int color, int map[8][8],
-           int kd[8][8])  //对某一个棋盘，计算某一方棋子的Kingmove数
-{
+//对某一个棋盘，计算某一方棋子的Kingmove数
+void kmove(int color, int map[8][8], int kd[8][8]) {
     queue<P> que;
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++) kd[i][j] = INF;  //所有的位置都初始化为INF
@@ -112,23 +129,18 @@ void kmove(int color, int map[8][8],
             {
                 int nx = p.first + dx[j],
                     ny = p.second + dy[j];  //移动后的位置标记为(nx,ny)
-                if (inMap(nx, ny) && map[nx][ny] == 0 &&
-                    kd[nx][ny] >
-                        kd[p.first][p.second] +
-                            1)  //判断是否可以移动以及是否比kd中的距离小）
-                {
+                //判断是否可以移动以及是否比kd中的距离小）
+                if (inMap(nx, ny) && map[nx][ny] == 0 && kd[nx][ny] > kd[p.first][p.second] + 1) {
                     que.push(P(nx, ny));  //可以移动，添加到队列
-                    kd[nx][ny] = kd[p.first][p.second] +
-                                 1;  //到该位置的距离为到p的距离+1
+                    //到该位置的距离为到p的距离+1
+                    kd[nx][ny] = kd[p.first][p.second] + 1;
                 }
             }
         }
     }
 }
-
-void qmove(int color, int map[8][8],
-           int qd[8][8])  //对某一个棋盘，计算某一方棋子的Kingmove数
-{
+//对某一个棋盘，计算某一方棋子的Kingmove数
+void qmove(int color, int map[8][8], int qd[8][8]) {
     queue<P> que;
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++) qd[i][j] = INF;  //所有的位置都初始化为INF
@@ -147,19 +159,16 @@ void qmove(int color, int map[8][8],
 
             for (int j = 0; j < 8; j++)  //向8个方向
             {
-                for (int step = 1; step < GRIDSIZE;
-                     step++) {  //向某方向走的步数
+                for (int step = 1; step < GRIDSIZE; step++) {  //向某方向走的步数
                     int nx = p.first + dx[j] * step,
-                        ny = p.second +
-                             dy[j] * step;  //移动后的位置标记为(nx,ny)
+                        ny = p.second + dy[j] * step;  //移动后的位置标记为(nx,ny)
                     // cout<<"("<<sx<<","<<sy<<") → ("<<nx<<"," <<ny<<")
                     // t="<<temp_grid[nx][ny]<<" k="<< kd[nx][ny]<<"
                     // S="<<step<<endl;
                     if (inMap(nx, ny) && map[nx][ny] == 0 &&
                         qd[nx][ny] > qd[p.first][p.second] + 1) {
-                        que.push(P(nx, ny));  //可以移动，添加到队列
-                        qd[nx][ny] = qd[p.first][p.second] +
-                                     1;  //到该位置的步数为到p的步数+1
+                        que.push(P(nx, ny));                     //可以移动，添加到队列
+                        qd[nx][ny] = qd[p.first][p.second] + 1;  //到该位置的步数为到p的步数+1
                     } else
                         break;  //发现障碍 跳出
                 }
@@ -168,16 +177,21 @@ void qmove(int color, int map[8][8],
     }
 }
 
-float Evaluation(int color, int map[8][8],
-                 int currturns) {  //返回Territory值     当前颜色-对方颜色
-                                   //默认为白-黑 黑的话加一负号
+//返回Territory值（当前颜色-对方颜色）
+//默认为白-黑 黑的话加一负号
+float Evaluation(int color, int map[8][8], int currturns) {
     search_count++;
     int k_w[8][8], k_b[8][8], q_w[8][8], q_b[8][8];
     kmove(-1, map, k_w), kmove(1, map, k_b);
     qmove(-1, map, q_w), qmove(1, map, q_b);
-    float c1 = 0, c2 = 0, t1 = 0, t2 = 0;  //计算position(c1,c2)
+
+    //计算position(c1,c2)
+    // t1/2: t_1/2 'territory'
+    // c1/2: c_1/2 'position'
+    float c1 = 0, c2 = 0, t1 = 0, t2 = 0;
     for (int i = 0; i < GRIDSIZE; i++) {
         for (int j = 0; j < GRIDSIZE; j++) {
+            // QueenMove
             if (q_b[i][j] == INF && q_b[i][j] == q_w[i][j])
                 t1 += 0;
             else if (q_b[i][j] != INF && q_b[i][j] == q_w[i][j])
@@ -187,6 +201,7 @@ float Evaluation(int color, int map[8][8],
             else
                 t1 += -1;
 
+            // KingMove
             if (k_b[i][j] == INF && k_b[i][j] == k_w[i][j])
                 t2 += 0;
             else if (k_b[i][j] != INF && k_b[i][j] == k_w[i][j])
@@ -206,8 +221,7 @@ float Evaluation(int color, int map[8][8],
         for (int j = 0; j < GRIDSIZE; j++) {
             if (map[i][j] == 0) {
                 for (int m = 0; m < 8; m++) {  //八个方向
-                    if (inMap(i + dx[m], j + dy[m]) &&
-                        map[i + dx[m]][j + dy[m]] == 0)
+                    if (inMap(i + dx[m], j + dy[m]) && map[i + dx[m]][j + dy[m]] == 0)
                         emptyblocks[i][j]++;
                 }
             }
@@ -221,12 +235,10 @@ float Evaluation(int color, int map[8][8],
         for (int i = 0; i < 8; i++) {  // 向8个方向
             for (int step = 1; step < 8; step++) {
                 int nx = pos_white[j][0] + dx[i] * step,
-                    ny = pos_white[j][1] +
-                         dy[i] * step;  //移动后的位置标记为(nx,ny)
+                    ny = pos_white[j][1] + dy[i] * step;  //移动后的位置标记为(nx,ny)
                 // cout << "posx="<<pos_white[ j ][ 0 ]<<"posy=" << pos_white[ j
                 // ][ 1 ] << "nx=" << nx << "ny=" << ny << endl;
-                if (inMap(nx, ny) && map[nx][ny] == 0 &&
-                    q_w[nx][ny] != INF) {  //判断是否可以移动
+                if (inMap(nx, ny) && map[nx][ny] == 0 && q_w[nx][ny] != INF) {  //判断是否可以移动
                     m_w += (float)emptyblocks[nx][ny] / (float)step;
                 } else
                     break;  //此方向不能移动
@@ -237,12 +249,10 @@ float Evaluation(int color, int map[8][8],
         for (int i = 0; i < 8; i++) {  // 向8个方向
             for (int step = 1; step < 8; step++) {
                 int nx = pos_black[j][0] + dx[i] * step,
-                    ny = pos_black[j][1] +
-                         dy[i] * step;  //移动后的位置标记为(nx,ny)
+                    ny = pos_black[j][1] + dy[i] * step;  //移动后的位置标记为(nx,ny)
                 // cout << "posx="<<pos_white[ j ][ 0 ]<<"posy=" << pos_white[ j
                 // ][ 1 ] << "nx=" << nx << "ny=" << ny << endl;
-                if (inMap(nx, ny) && map[nx][ny] == 0 &&
-                    q_b[nx][ny] != INF) {  //判断是否可以移动
+                if (inMap(nx, ny) && map[nx][ny] == 0 && q_b[nx][ny] != INF) {  //判断是否可以移动
                     m_b += (float)emptyblocks[nx][ny] / (float)step;
                 } else
                     break;
@@ -255,8 +265,7 @@ float Evaluation(int color, int map[8][8],
                 f3[turns + currturns] * c1 + f4[turns + currturns] * c2 +
                 f5[turns + currturns] * (m_w - m_b);
     } else {
-        value = f1[22] * t1 + f2[22] * t2 + f3[22] * c1 + f4[22] * c2 +
-                f5[22] * (m_w - m_b);
+        value = f1[22] * t1 + f2[22] * t2 + f3[22] * c1 + f4[22] * c2 + f5[22] * (m_w - m_b);
     }
     if (color == 1)
         return -value;
@@ -290,10 +299,11 @@ inline void StepBack(Move a, int color, int temp_grid[8][8]) {
     temp_grid[a.x0][a.y0] = color;
 }
 
-float PVS(int color, int map[8][8], float alpha, float beta, int depth,
-          int d)  // alpha为当前层估值下界 beta为上界 depth为剩余深度
-                  // //color为当前按执子方
-{
+// alpha为当前层估值下界 beta为上界 depth为剩余深度
+// color为当前按执子方
+
+
+float PVS(int color, int map[8][8], float alpha, float beta, int depth, int d) {
     if (depth == 0 || 1000 * clock() / CLOCKS_PER_SEC >= max_time) {
         return Evaluation(color, map, (d - depth) / 2);
     }
@@ -303,8 +313,8 @@ float PVS(int color, int map[8][8], float alpha, float beta, int depth,
     float value = 0;
     int pos_color[8][2];
 
-    for (int i = 0; i < 8; i++)  // getpos
-    {
+    // getpos
+    for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (map[i][j] == color) {
                 pos_color[pos][0] = i;
@@ -332,8 +342,7 @@ float PVS(int color, int map[8][8], float alpha, float beta, int depth,
                         x2 = x1 + dx[l] * len2;
                         y2 = y1 + dy[l] * len2;
                         if (!inMap(x2, y2)) break;
-                        if (map[x2][y2] != 0 &&
-                            !(pos_color[i][0] == x2 && pos_color[i][1] == y2))
+                        if (map[x2][y2] != 0 && !(pos_color[i][0] == x2 && pos_color[i][1] == y2))
                             break;
                         moves[pos].x0 = pos_color[i][0];
                         moves[pos].y0 = pos_color[i][1];
@@ -361,8 +370,7 @@ float PVS(int color, int map[8][8], float alpha, float beta, int depth,
         ProcStep(moves[i], color, map);
         value = -PVS(-color, map, -best - PVS_width, -best, depth - 1, d);
 
-        if (value >= best + 1 &&
-            value < beta)  //出现了窗口以外的最大值，这时要更新best
+        if (value >= best + 1 && value < beta)  //出现了窗口以外的最大值，这时要更新best
             best = -PVS(-color, map, -beta, -value, depth - 1,
                         d);  //以value作为下界再次搜索
 
@@ -378,20 +386,24 @@ float PVS(int color, int map[8][8], float alpha, float beta, int depth,
     return best;
 }
 
-Move SearchStep(
-    int color,
-    int map[8][8])  //单独把第一层的搜索做成一个函数 为了预先排序
-                    //因为第二层大概率搜不完 并且这一层不是返回估值二十走法
-{
+//单独把第一层的搜索做成一个函数 为了预先排序
+//因为第二层大概率搜不完 并且这一层不是返回估值而是走法
+Move SearchStep(int color, int map[8][8]) {
+    // Get a copy of original grid
     int temp_grid[8][8];
     memcpy(temp_grid, map, 256);
 
+    // Initialize moves' array
     Move moves[1232];
     memset(moves, 0, sizeof(moves));
     int i, j;
     int pos = 0, pos_rival = 0;
     float value = 0;
+
+    // The first dimension is the no of queen. The second is x or y.
+    // 0-3 is this side while 4-7 the other.
     int pos_color[8][2];
+
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (map[i][j] == color) {
@@ -408,22 +420,36 @@ Move SearchStep(
         if (pos == 4 && pos_rival == 4) break;
     }
     pos = 0;
+    // 4 queens
     for (int i = 0; i < 4; i++) {
         int k, l, len1, len2, x1, x2, y1, y2;
+        // 8 direction of moving
         for (k = 0; k < 8; k++) {
+            // <8 length of moving
             for (len1 = 1; len1 < 8; len1++) {
+                // Get new position (x1,y1)
                 x1 = pos_color[i][0] + dx[k] * len1;
                 y1 = pos_color[i][1] + dy[k] * len1;
+
+                // If Arrows or Queens ocuupy the position OR out of range, stop
+                // 'extending'
                 if (map[x1][y1] != 0 || !inMap(x1, y1)) break;
+
+                // 8 direction of shooting
                 for (l = 0; l < 8; l++) {
+                    // <8 length of shooting
                     for (len2 = 1; len2 < 8; len2++) {
+                        // Get the position (x2,y2) of the Arrow
                         x2 = x1 + dx[l] * len2;
                         y2 = y1 + dy[l] * len2;
+
+                        // If Queens ( Except current Queen which just moved to
+                        // (x1,y1) ) ocuupied OR out of range, stop 'extending'
                         if (!inMap(x2, y2)) break;
-                        if (map[x2][y2] != 0 &&
-                            !(pos_color[i][0] == x2 && pos_color[i][1] == y2))
+                        if (map[x2][y2] != 0 && !(pos_color[i][0] == x2 && pos_color[i][1] == y2))
                             break;
 
+                        // Generating a new move
                         // cout << value << endl;
                         moves[pos].x0 = pos_color[i][0];
                         moves[pos].y0 = pos_color[i][1];
@@ -431,6 +457,8 @@ Move SearchStep(
                         moves[pos].y1 = y1;
                         moves[pos].x2 = x2;
                         moves[pos].y2 = y2;
+
+                        // Emulate the steps and calculate the value
                         ProcStep(moves[pos], color, temp_grid);
                         value = Evaluation(color, temp_grid, 0);
                         StepBack(moves[pos], color, temp_grid);
@@ -441,12 +469,14 @@ Move SearchStep(
             }
         }
     }
+
+    // Sort to a decrease form
     sort(moves, moves + pos, comp);
     values[0] = moves[0].value;
     //预先排序
     int t = 0;
-    for (int d = 1; d < 10; d++)  //我知道我必定搜不了10层 但梦想总是要有的
-    {
+    //我知道我必定搜不了10层 但梦想总是要有的
+    for (int d = 1; d < 10; d++) {
         max_depth = d;
         for (t = 0; t < pos; t++) {
             if (1000 * clock() / CLOCKS_PER_SEC >= max_time) break;
@@ -484,8 +514,7 @@ int main() {
         grid[x1][y1] = 1;
         grid[x2][y2] = 2;
     }
-    for (int i = 1; i < turns;
-         i++)  //以后的回合，每回合有两次移动，且都是自己先动，对方后动
+    for (int i = 1; i < turns; i++)  //以后的回合，每回合有两次移动，且都是自己先动，对方后动
     {
         cin >> y0 >> x0 >> y1 >> x1 >> y2 >> x2;
         // ProcStep(x0, y0, x1, y1, x2, y2, color);//己方落子
@@ -502,7 +531,7 @@ int main() {
 
     Move move;
     move = SearchStep(color, grid);
-    cout << move.y0 << ' ' << move.x0 << ' ' << move.y1 << ' ' << move.x1 << ' '
-         << move.y2 << ' ' << move.x2 << endl;
+    cout << move.y0 << ' ' << move.x0 << ' ' << move.y1 << ' ' << move.x1 << ' ' << move.y2 << ' '
+         << move.x2 << endl;
     return 0;
 }
