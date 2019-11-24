@@ -4,5 +4,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+
 PROJECT(amazons)
-ADD_EXECUTABLE(amazons amazons.cpp)
+
+SET(CMAKE_CXX_STANDARD 17)
+#SET(CMAKE_CXX_FLAGS -fexec-charset=GB18030)
+#CMAKE_CXX_FLAGS
+
+AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+ADD_EXECUTABLE(amazons ${DIR_SRCS})

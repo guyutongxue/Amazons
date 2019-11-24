@@ -8,7 +8,10 @@
 
 #include "amazons.h"
 
-int main() {
-    std::cout << std::endl;
-    return 0;
+Amazons::Amazons() {
+    chessboard=Chessboard::start;
+}
+
+const Chessboard& Amazons::getChessboard(){
+    return chessboard;
 }

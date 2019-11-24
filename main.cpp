@@ -1,25 +1,16 @@
 /**
  * Copyright (c) 2019 Guyutongxue
- *
+ * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef AMAZONS_H
-#define AMAZONS_H
+#include "ui.h"
 
-#include <iostream>
-#include "chessboard.h"
-
-class Amazons {
-public:
-    
-    Amazons();
-    const Chessboard& getChessboard();
-
-private:
-    Chessboard chessboard;
-};
-
-#endif  // AMAZONS_H
+int main() {
+    UI ui;
+    ui.printGame();
+    system("pause");
+    return 0;
+}
