@@ -9,6 +9,7 @@
 #ifndef UI_H
 #define UI_H
 
+#include <conio.h>
 #include <windows.h>
 #include <string>
 #include "amazons.h"
@@ -17,7 +18,10 @@ class UI {
 public:
     UI();
     ~UI();
-    void printGame();
+    void printBoardBackground();
+    void printGame(Chessboard board);
+    int printMainMenu();
+    int printModeMenu();
     enum class Color {
         Black,         // 黑
         Blue,          // 蓝
@@ -36,17 +40,20 @@ public:
         Yellow,        // 黄
         White          // 白
     };
+
 private:
-    Amazons game;
     HANDLE hOut;
     CONSOLE_SCREEN_BUFFER_INFO bInfo;
+    short center_x;
+    void clearScreen();
     void setPos(short x, short y);
-    void setColor(Color foreground,Color background);
+    void setColor(Color foreground, Color background);
+    int printMenu(const std::string& title, std::string* choices, short* pos, int num);
     constexpr static const char* boardLine[17] = {
-        "┌─┬─┬─┬─┬─┬─┬─┬─┐", "| | | | | | | | |", "├─┼─┼─┼─┼─┼─┼─┼─┤", "| | | | | | | | |",
-        "├─┼─┼─┼─┼─┼─┼─┼─┤", "| | | | | | | | |", "├─┼─┼─┼─┼─┼─┼─┼─┤", "| | | | | | | | |",
-        "├─┼─┼─┼─┼─┼─┼─┼─┤", "| | | | | | | | |", "├─┼─┼─┼─┼─┼─┼─┼─┤", "| | | | | | | | |",
-        "├─┼─┼─┼─┼─┼─┼─┼─┤", "| | | | | | | | |", "├─┼─┼─┼─┼─┼─┼─┼─┤", "| | | | | | | | |",
+        "┌─┬─┬─┬─┬─┬─┬─┬─┐", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
+        "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
+        "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
+        "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
         "└─┴─┴─┴─┴─┴─┴─┴─┘"};
 };
 

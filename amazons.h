@@ -12,10 +12,13 @@
 #include <iostream>
 #include "chessboard.h"
 
+enum class GameMode { HumanBot = 0, BotBot = 1, HumanHuman = 2 };
+
 class Amazons {
 public:
-    
+    GameMode gameMode;
     Amazons();
+    void step(Move move);
     const Chessboard& getChessboard();
 
 private:

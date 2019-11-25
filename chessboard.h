@@ -13,6 +13,20 @@
 #include <iostream>
 
 enum class Square { Empty = 0, White = 1, Black = -1, Arrow = 2 };
+enum class Player { White = 1, Black = -1 };
+
+class Move {
+public:
+    int x0, y0;
+    int x1, y1;
+    int x2, y2;
+    friend class Bot;
+    bool operator<(Move b) {
+        return value > b.value;
+    }
+private:
+    double value;
+};
 
 class Chessboard {
 public:
@@ -21,7 +35,7 @@ public:
     Chessboard(const int (&origin)[8][8]);
     static const Chessboard start;
     Chessboard& operator=(const Chessboard& src);
-    Square& at(int x,int y);
+    Square& at(int x, int y);
     void print();
 
 private:

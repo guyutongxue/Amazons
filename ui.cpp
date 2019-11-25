@@ -7,11 +7,6 @@
  */
 
 #include "ui.h"
-#include "amazons.h"
-
-using std::cin;
-using std::cout;
-using std::endl;
 
 UI::UI() {
     // 更换输出代码页到 UTF-8
@@ -20,35 +15,114 @@ UI::UI() {
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     // 获取控制台信息
     GetConsoleScreenBufferInfo(hOut, &bInfo);
+    center_x = bInfo.dwSize.X / 2 - 9;
+
+    COORD bufSize={bInfo.dwSize.X,30};
+    SetConsoleScreenBufferSize(hOut,bufSize);
+
     // 设置控制台标题为“亚马逊棋”（使用 Unicode(UTF-16-BE) ）
-    SetConsoleTitleW(L"\u4e9a\u9a6c\u900a\u68cb");
+    SetConsoleTitleW(L"亚马逊棋");
+
+    setColor(Color::White, Color::Black);
+
+    // 隐藏光标
+    CONSOLE_CURSOR_INFO cInfo = {1, 0};
+    SetConsoleCursorInfo(hOut, &cInfo);
+
 }
 
 UI::~UI() {
     CloseHandle(hOut);
 }
 
-void UI::printGame() {
-    Chessboard target = game.getChessboard();
-    short ori_x = bInfo.dwSize.X / 2 - 9;
+int UI::printMainMenu(){
+    std::string chs[3]={"1. 开始游戏","2. 读取游戏","3. 退出"};
+    short pos[3]={5,10,15};
+    return printMenu("亚马逊棋",chs,pos,3);
+}
+
+int UI::printModeMenu(){
+    std::string chs[4]={"1. 人机对战","2. 机机对战","3. 人人对战","4. 返回"};
+    short pos[4]={5,10,15,20};
+    return printMenu("选择模式",chs,pos,4);
+}
+
+int UI::printMenu(const std::string& title,std::string* choices,short* pos,int num) {
+    clearScreen();
+    setPos(center_x - 4, 0);
+    std::cout << title;
+    for (int i = 0; i < num; i++) {
+        setPos(center_x - 6, pos[i]);
+        std::cout << choices[i];
+    }
+    DWORD buffer;
+    int keycode, currentChoice = 0;
+    // 选中第0选项
+    FillConsoleOutputAttribute(hOut, 0xF0, 15, COORD{short(center_x - 7), pos[currentChoice]},
+                               &buffer);
+    while (keycode = getch(), keycode != 13) {
+        keycode = getch();
+        // 取消选中选项
+        FillConsoleOutputAttribute(hOut, 0x0F, 15, COORD{short(center_x - 7), pos[currentChoice]},
+                                   &buffer);
+        switch (keycode) {
+            case 72: {  // up
+                currentChoice = (currentChoice == 0 ? 0 : currentChoice - 1);
+                break;
+            }
+            case 80: {  // down
+                currentChoice = (currentChoice == num-1 ? num-1 : currentChoice + 1);
+                break;
+            }
+            default:
+                break;
+        }
+        // 选中当前选项
+        FillConsoleOutputAttribute(hOut, 0xF0, 15, COORD{short(center_x - 7), pos[currentChoice]},
+                                   &buffer);
+    }
+    return currentChoice;
+    // setPos(center_x-)
+}
+
+void UI::clearScreen() {
+    DWORD buffer;
+    for (short i = 0; i < 30; i++) {
+        COORD pos = {0, i};
+        FillConsoleOutputAttribute(hOut, 0x0F, bInfo.dwSize.X - 10, pos, &buffer);
+        FillConsoleOutputCharacter(hOut, ' ', bInfo.dwSize.X - 10, pos, &buffer);
+    }
+}
+
+void UI::printBoardBackground() {
     setColor(Color::Black, Color::White);
     for (int i = 0; i < 17; i++) {
-        setPos(ori_x, i);
+        setPos(center_x - 9, i);
         std::cout << boardLine[i] << std::endl;
     }
+}
+
+void UI::printGame(Chessboard board) {
+    setColor(Color::Black, Color::White);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if (target.at(i, j) == Square::White) {
-                setPos(ori_x + i * 2 + 1, j * 2 + 1);
-                cout << "○";
-            } else if (target.at(i, j) == Square::Black) {
-                setPos(ori_x + i * 2 + 1, j * 2 + 1);
-                cout << "●";
+            if (board.at(i, j) == Square::White) {
+                setPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
+                std::cout << "○";
+            } else if (board.at(i, j) == Square::Black) {
+                setPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
+                std::cout << "●";
+            }
+            else if (board.at(i, j) == Square::Arrow) {
+                setPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
+                std::cout << "X";
             }
         }
     }
+    // setPos(ori_x,17);
+    // std::cout<<" 0 1 2 3 4 5 6 7 "<<std::endl;
     setColor(Color::White, Color::Black);
-    setPos(ori_x, 18);
+    setPos(center_x - 9, 18);
 }
 
 void UI::setPos(short x, short y) {
