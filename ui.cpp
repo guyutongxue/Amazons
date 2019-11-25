@@ -14,10 +14,14 @@ using std::cout;
 using std::endl;
 
 UI::UI() {
+    // 更换输出代码页到 UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+    // 获取标准输出句柄
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    // 获取控制台信息
     GetConsoleScreenBufferInfo(hOut, &bInfo);
-
-    SetConsoleTitle(TEXT("����ѷ��"));
+    // 设置控制台标题为“亚马逊棋”（使用 Unicode(UTF-16-BE) ）
+    SetConsoleTitleW(L"\u4e9a\u9a6c\u900a\u68cb");
 }
 
 UI::~UI() {
@@ -36,10 +40,10 @@ void UI::printGame() {
         for (int j = 0; j < 8; j++) {
             if (target.at(i, j) == Square::White) {
                 setPos(ori_x + i * 2 + 1, j * 2 + 1);
-                cout << "��";
+                cout << "○";
             } else if (target.at(i, j) == Square::Black) {
                 setPos(ori_x + i * 2 + 1, j * 2 + 1);
-                cout << "��";
+                cout << "●";
             }
         }
     }
