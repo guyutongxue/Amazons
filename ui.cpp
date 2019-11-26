@@ -106,17 +106,16 @@ void UI::printGame(Chessboard board) {
     setColor(Color::Black, Color::White);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
+            setPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
             if (board.at(i, j) == Square::White) {
-                setPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
                 std::cout << "○";
             } else if (board.at(i, j) == Square::Black) {
-                setPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
                 std::cout << "●";
             }
             else if (board.at(i, j) == Square::Arrow) {
-                setPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
-                std::cout << "X";
+                std::cout << "×";
             }
+            else std::cout << " ";
         }
     }
     // setPos(ori_x,17);

@@ -20,6 +20,7 @@ public:
     Amazons();
     void step(Move move);
     const Chessboard& getChessboard();
+    bool isOver(Player pl)const;
 
 private:
     Chessboard chessboard;

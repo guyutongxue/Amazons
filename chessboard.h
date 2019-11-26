@@ -21,9 +21,10 @@ public:
     int x1, y1;
     int x2, y2;
     friend class Bot;
-    bool operator<(Move b) {
+    bool operator>(Move b) {
         return value > b.value;
     }
+
 private:
     double value;
 };
@@ -36,6 +37,7 @@ public:
     static const Chessboard start;
     Chessboard& operator=(const Chessboard& src);
     Square& at(int x, int y);
+    const Square& at(int x, int y) const;
     void print();
 
 private:

@@ -16,35 +16,33 @@ Chessboard::Chessboard(const Chessboard& origin) {
     memcpy(board, origin.board, sizeof(board));
 }
 
-Chessboard::Chessboard(const int(& origin)[8][8]){
+Chessboard::Chessboard(const int (&origin)[8][8]) {
     memcpy(board, origin, sizeof(board));
 }
 
-Chessboard& Chessboard::operator=(const Chessboard& src){
-    memcpy(board,src.board,sizeof(board));
+Chessboard& Chessboard::operator=(const Chessboard& src) {
+    memcpy(board, src.board, sizeof(board));
     return *this;
 }
 
-Square& Chessboard::at(int x,int y){
+Square& Chessboard::at(int x, int y) {
     return board[x][y];
 }
 
-const Chessboard Chessboard::start=(int[8][8]){
-    {0,0,1,0,0,1,0,0},
-    {0,0,0,0,0,0,0,0},
-    {1,0,0,0,0,0,0,1},
-    {0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0},
-    {-1,0,0,0,0,0,0,-1},
-    {0,0,0,0,0,0,0,0},
-    {0,0,-1,0,0,-1,0,0}
-};
+const Square& Chessboard::at(int x, int y) const {
+    return board[x][y];
+}
 
-void Chessboard::print(){
-    for(int i=0;i<8;i++){
-        for(int j=0;j<8;j++){
-            std::cout<<(int)board[i][j]<<" ";
+const Chessboard Chessboard::start =
+    (int[8][8]){{0, 0, 1, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},  {1, 0, 0, 0, 0, 0, 0, 1},
+                {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},  {-1, 0, 0, 0, 0, 0, 0, -1},
+                {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, -1, 0, 0, -1, 0, 0}};
+
+void Chessboard::print() {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            std::cout << (int)board[i][j] << " ";
         }
-        std::cout<<std::endl;
+        std::cout << std::endl;
     }
 }

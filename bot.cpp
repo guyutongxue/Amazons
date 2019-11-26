@@ -14,108 +14,106 @@
 
 #include "bot.h"
 
-//获取color棋子坐标
-void Bot::getPos(Chessboard map, Player pl, int pos[4][2]) {
+void Bot::getPos(Chessboard map, Player pl, Coordinate pos[4]) {
     int counter = 0;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (int(map.at(i, j)) == int(pl)) {
-                pos[counter][0] = i;
-                pos[counter][1] = j;
+                pos[counter].x = i;
+                pos[counter].y = j;
                 counter++;
             }
         }
         if (counter == 4) break;
     }
 }
-//对某一个棋盘，计算某一方棋子的Kingmove数
-void Bot::kmove(Player pl, Chessboard map, int kd[8][8]) {
-    queue<P> que;
+
+void Bot::kingMove(Player pl, const Chessboard& map, int kd[8][8]) {
+    std::queue<Coordinate> que;
+    // 所有的位置都初始化为无穷大（不可到达）
     for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++) kd[i][j] = INF;  //所有的位置都初始化为INF
-    int pos[4][2];
+        for (int j = 0; j < 8; j++) kd[i][j] = INF;
+    Coordinate pos[4];
     getPos(map, pl, pos);
+    // 对每一个棋子进行广度优先搜索
     for (int i = 0; i < 4; i++) {
-        que.push(P(pos[i][0], pos[i][1]));  //将起点加入队列中
-        // cout << P(pos[i][0],pos[i][1]).first << ' ' <<
-        // P(pos[i][0],pos[i][1]).second << endl; //debug
-        kd[pos[i][0]][pos[i][1]] = 0;  //并把这一地点的距离设置为0
-        while (!que.empty())           //队列不空
-        {
-            P p = que.front();           // 从队列的最前端取出元素
-            que.pop();                   //取出后从队列中删除该元素
-            for (int j = 0; j < 8; j++)  //向8个方向
-            {
-                int nx = p.first + dx[j],
-                    ny = p.second + dy[j];  //移动后的位置标记为(nx,ny)
-                //判断是否可以移动以及是否比kd中的距离小）
+        // 起点入列
+        que.push(Coordinate(pos[i].x, pos[i].y));
+        kd[pos[i].x][pos[i].y] = 0;
+        while (!que.empty()) {
+            // 首元素出列
+            Coordinate p = que.front();
+            que.pop();
+            // 8个方向
+            for (int j = 0; j < 8; j++) {
+                int nx = p.x + dx[j], ny = p.y + dy[j];
+                // 判断是否为空以及是否需要更新（比原先的要小）
                 if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty &&
-                    kd[nx][ny] > kd[p.first][p.second] + 1) {
-                    que.push(P(nx, ny));  //可以移动，添加到队列
-                    //到该位置的距离为到p的距离+1
-                    kd[nx][ny] = kd[p.first][p.second] + 1;
+                    kd[nx][ny] > kd[p.x][p.y] + 1) {
+                    // 入列并更新值
+                    que.push(Coordinate(nx, ny));
+                    kd[nx][ny] = kd[p.x][p.y] + 1;
                 }
             }
         }
     }
 }
 //对某一个棋盘，计算某一方棋子的Kingmove数
-void Bot::qmove(Player pl, Chessboard map, int qd[8][8]) {
-    queue<P> que;
+void Bot::queenMove(Player pl, const Chessboard& map, int qd[8][8]) {
+    std::queue<Coordinate> que;
+    // 所有的位置都初始化为无穷大（不可到达）
     for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++) qd[i][j] = INF;  //所有的位置都初始化为INF
-    int pos[4][2];
+        for (int j = 0; j < 8; j++) qd[i][j] = INF;
+    Coordinate pos[4];
     getPos(map, pl, pos);
 
+    // 对每一个棋子进行广度优先搜索
     for (int i = 0; i < 4; i++) {
-        que.push(P(pos[i][0], pos[i][1]));  //将起点加入队列中
-        // cout << P(pos[i][0],pos[i][1]).first << ' ' <<
-        // P(pos[i][0],pos[i][1]).second << endl;
-        qd[pos[i][0]][pos[i][1]] = 0;  //并把这一地点的距离设置为0
-        while (!que.empty())           //队列不空
-        {
-            P p = que.front();  // 从队列的最前端取出元素
-            que.pop();          //取出后从队列中删除该元素
-
-            for (int j = 0; j < 8; j++)  //向8个方向
-            {
-                for (int step = 1; step < 8; step++) {  //向某方向走的步数
-                    int nx = p.first + dx[j] * step,
-                        ny = p.second + dy[j] * step;  //移动后的位置标记为(nx,ny)
-                    // cout<<"("<<sx<<","<<sy<<") → ("<<nx<<"," <<ny<<")
-                    // t="<<temp_grid[nx][ny]<<" k="<< kd[nx][ny]<<"
-                    // S="<<step<<endl;
+        // 起点入列
+        que.push(Coordinate(pos[i].x, pos[i].y));
+        qd[pos[i].x][pos[i].y] = 0;
+        while (!que.empty()) {
+            // 弹出首元素
+            Coordinate p = que.front();
+            que.pop();
+            // 8个方向
+            for (int j = 0; j < 8; j++) {
+                // 移动长度
+                for (int step = 1; step < 8; step++) {
+                    int nx = p.x + dx[j] * step, ny = p.y + dy[j] * step;
+                    // 判断是否为空以及是否需要更新（比原先的要小）
                     if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty &&
-                        qd[nx][ny] > qd[p.first][p.second] + 1) {
-                        que.push(P(nx, ny));                     //可以移动，添加到队列
-                        qd[nx][ny] = qd[p.first][p.second] + 1;  //到该位置的步数为到p的步数+1
+                        qd[nx][ny] > qd[p.x][p.y] + 1) {
+                        // 入列并更新值
+                        que.push(Coordinate(nx, ny));
+                        qd[nx][ny] = qd[p.x][p.y] + 1;
                     } else
-                        break;  //发现障碍 跳出
+                        break;
                 }
             }
         }
     }
 }
 
-//返回Territory值（当前颜色-对方颜色）
-//默认为白-黑 黑的话加一负号
-double Bot::evaluation(Player pl, Chessboard map, int currturns) {
+double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
     search_count++;
     int k_w[8][8], k_b[8][8], q_w[8][8], q_b[8][8];
-    kmove(Player::Black, map, k_w), kmove(Player::White, map, k_b);
-    qmove(Player::Black, map, q_w), qmove(Player::White, map, q_b);
+    kingMove(Player::Black, map, k_b);
+    kingMove(Player::White, map, k_w);
+    queenMove(Player::Black, map, q_b);
+    queenMove(Player::White, map, q_w);
 
-    //计算position(c1,c2)
-    // t1/2: t_1/2 'territory'
-    // c1/2: c_1/2 'position'
-    double c1 = 0, c2 = 0, t1 = 0, t2 = 0;
+    // 以白方为己方
+    // t1/2:  'territory'
+    // p1/2:  'position'
+    double p1 = 0, p2 = 0, t1 = 0, t2 = 0;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             // QueenMove
             if (q_b[i][j] == INF && q_b[i][j] == q_w[i][j])
                 t1 += 0;
             else if (q_b[i][j] != INF && q_b[i][j] == q_w[i][j])
-                t1 += -firstHandAdvantage;
+                t1 += firstHandAdvantage;
             else if (q_w[i][j] < q_b[i][j])
                 t1 += 1;
             else
@@ -125,22 +123,25 @@ double Bot::evaluation(Player pl, Chessboard map, int currturns) {
             if (k_b[i][j] == INF && k_b[i][j] == k_w[i][j])
                 t2 += 0;
             else if (k_b[i][j] != INF && k_b[i][j] == k_w[i][j])
-                t2 += -firstHandAdvantage;
+                t2 += firstHandAdvantage;
             else if (k_w[i][j] < k_b[i][j])
                 t2 += 1;
             else
                 t2 += -1;
 
-            c1 += 2.0 / pow2(q_w[i][j]) - 2.0 / pow2(q_b[i][j]);
-            c2 += min(1.0, max(-1.0, (1.0 / 6.0) * (k_b[i][j] - k_w[i][j])));
+            p1 += 2.0 / pow2(q_w[i][j]) - 2.0 / pow2(q_b[i][j]);
+            p2 += std::min(1.0, std::max(-1.0, (1.0 / 6.0) * (k_b[i][j] - k_w[i][j])));
         }
     }
+
+    // 计算空格的 ’mobility‘
     int emptyblocks[8][8];
     memset(emptyblocks, 0, sizeof(emptyblocks));
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (map.at(i, j) == Square::Empty) {
-                for (int m = 0; m < 8; m++) {  //八个方向
+                // 记录八个方向上的相邻空格
+                for (int m = 0; m < 8; m++) {
                     if (inMap(i + dx[m], j + dy[m]) &&
                         map.at(i + dx[m], j + dy[m]) == Square::Empty)
                         emptyblocks[i][j]++;
@@ -148,34 +149,34 @@ double Bot::evaluation(Player pl, Chessboard map, int currturns) {
             }
         }
     }
-    int pos_black[4][2], pos_white[4][2];
-    getPos(map, Player::White, pos_black), getPos(map, Player::Black, pos_white);
-    //计算mobility_white,mobility_black
+
+    Coordinate pos_black[4], pos_white[4];
+    getPos(map, Player::White, pos_white);
+    getPos(map, Player::Black, pos_black);
+    // 计算棋子的 'mobility'
     double m_w = 0, m_b = 0;
-    for (int j = 0; j < 4; j++) {      //第j个点
-        for (int i = 0; i < 8; i++) {  // 向8个方向
+    // 4个白方棋子
+    for (int j = 0; j < 4; j++) {
+        // 8个方向
+        for (int i = 0; i < 8; i++) {
+            // 以 QueenMove 方式移动
             for (int step = 1; step < 8; step++) {
-                int nx = pos_white[j][0] + dx[i] * step,
-                    ny = pos_white[j][1] + dy[i] * step;  //移动后的位置标记为(nx,ny)
-                // cout << "posx="<<pos_white[ j ][ 0 ]<<"posy=" << pos_white[ j
-                // ][ 1 ] << "nx=" << nx << "ny=" << ny << endl;
-                if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty &&
-                    q_w[nx][ny] != INF) {  //判断是否可以移动
+                // 当前移动到的位置 (nx,ny)
+                int nx = pos_white[j].x + dx[i] * step, ny = pos_white[j].y + dy[i] * step;
+                // 遇到障碍停止
+                if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty && q_w[nx][ny] != INF) {
                     m_w += (double)emptyblocks[nx][ny] / (double)step;
                 } else
-                    break;  //此方向不能移动
+                    break;
             }
         }
     }
-    for (int j = 0; j < 4; j++) {      //第j个点
-        for (int i = 0; i < 8; i++) {  // 向8个方向
+    // 4个黑方棋子同理
+    for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < 8; i++) {
             for (int step = 1; step < 8; step++) {
-                int nx = pos_black[j][0] + dx[i] * step,
-                    ny = pos_black[j][1] + dy[i] * step;  //移动后的位置标记为(nx,ny)
-                // cout << "posx="<<pos_white[ j ][ 0 ]<<"posy=" << pos_white[ j
-                // ][ 1 ] << "nx=" << nx << "ny=" << ny << endl;
-                if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty &&
-                    q_b[nx][ny] != INF) {  //判断是否可以移动
+                int nx = pos_black[j].x + dx[i] * step, ny = pos_black[j].y + dy[i] * step;
+                if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty && q_b[nx][ny] != INF) {
                     m_b += (double)emptyblocks[nx][ny] / (double)step;
                 } else
                     break;
@@ -183,55 +184,42 @@ double Bot::evaluation(Player pl, Chessboard map, int currturns) {
         }
     }
     double value = 0;
+
+    // 计算白方为己方的优势程度
     if (turns + currturns < 22) {
         value = f1[turns + currturns] * t1 + f2[turns + currturns] * t2 +
-                f3[turns + currturns] * c1 + f4[turns + currturns] * c2 +
+                f3[turns + currturns] * p1 + f4[turns + currturns] * p2 +
                 f5[turns + currturns] * (m_w - m_b);
     } else {
-        value = f1[22] * t1 + f2[22] * t2 + f3[22] * c1 + f4[22] * c2 + f5[22] * (m_w - m_b);
+        value = f1[22] * t1 + f2[22] * t2 + f3[22] * p1 + f4[22] * p2 + f5[22] * (m_w - m_b);
     }
+
+    // 若黑方为己方返回相反数
     if (pl == Player::Black)
         return -value;
     else
         return value;
 }
 
-// alpha为当前层估值下界 beta为上界 depth为剩余深度
-// color为当前按执子方
-
 double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth, int d) {
-    if (depth == 0 || 1000 * clock() / CLOCKS_PER_SEC >= max_time) {
+    if (depth == 0 || 1000 * (clock()-start_time) / CLOCKS_PER_SEC >= max_time) {
         return evaluation(pl, map, (d - depth) / 2);
     }
     Move moves[1500];
     memset(moves, 0, sizeof(moves));
-    int pos = 0, pos_rival = 0;
+    int pos = 0;
     double value = 0;
-    int pos_color[8][2];
+    Coordinate pos_color[4];
+    getPos(map, pl, pos_color);
 
-    // getpos
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            if (int(map.at(i, j)) == int(pl)) {
-                pos_color[pos][0] = i;
-                pos_color[pos][1] = j;
-                pos = pos + 1;
-            }
-            if (int(map.at(i, j)) == -int(pl)) {
-                pos_color[pos_rival + 4][0] = i;
-                pos_color[pos_rival + 4][1] = j;
-                pos_rival = pos_rival + 1;
-            }
-        }
-        if (pos == 4 && pos_rival == 4) break;
-    }
-    pos = 0;  // cout << "OK" << endl;
+    pos = 0;
+    // 生成子节点
     for (int i = 0; i < 4; i++) {
         int k, l, len1, len2, x1, x2, y1, y2;
         for (k = 0; k < 8; k++) {
             for (len1 = 1; len1 < 8; len1++) {
-                x1 = pos_color[i][0] + dx[k] * len1;
-                y1 = pos_color[i][1] + dy[k] * len1;
+                x1 = pos_color[i].x + dx[k] * len1;
+                y1 = pos_color[i].y + dy[k] * len1;
                 if (map.at(x1, y1) != Square::Empty || !inMap(x1, y1)) break;
                 for (l = 0; l < 8; l++) {
                     for (len2 = 1; len2 < 8; len2++) {
@@ -239,10 +227,10 @@ double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth,
                         y2 = y1 + dy[l] * len2;
                         if (!inMap(x2, y2)) break;
                         if (map.at(x1, y1) != Square::Empty &&
-                            !(pos_color[i][0] == x2 && pos_color[i][1] == y2))
+                            !(pos_color[i].x == x2 && pos_color[i].y == y2))
                             break;
-                        moves[pos].x0 = pos_color[i][0];
-                        moves[pos].y0 = pos_color[i][1];
+                        moves[pos].x0 = pos_color[i].x;
+                        moves[pos].y0 = pos_color[i].y;
                         moves[pos].x1 = x1;
                         moves[pos].y1 = y1;
                         moves[pos].x2 = x2;
@@ -251,34 +239,37 @@ double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth,
                 }
             }
         }
-    }  //以上为步法生成部分 同时利用pos还可以做游戏是否结束的判断
+    }
+    // 若无路可走，游戏结束
     if (pos == 0) {
         return evaluation(pl, map, (d - depth) / 2);
-    }  //边界条件
+    }
 
-    // pvs全窗口搜索
+    // 搜索第一步，并假设它是最优秀的走法
     double best;
-    procStep(moves[0], pl, map);
+    makeMove(moves[0], pl, map);
     best = -PVS((Player) - int(pl), map, -beta, -alpha, depth - 1, d);
-    stepBack(moves[0], pl, map);
+    unmakeMove(moves[0], pl, map);
     if (best > alpha) alpha = best;
 
     for (int i = 1; i < pos; i++) {
-        procStep(moves[i], pl, map);
+        makeMove(moves[i], pl, map);
         value = -PVS((Player) - int(pl), map, -best - PVS_width, -best, depth - 1, d);
 
-        if (value >= best + 1 && value < beta)  //出现了窗口以外的最大值，这时要更新best
-            best = -PVS((Player) - int(pl), map, -beta, -value, depth - 1,
-                        d);  //以value作为下界再次搜索
+        // 假设验证失败
+        if (value >= best + 1 && value < beta)
+            //以value作为下界再次搜索
+            best = -PVS((Player) - int(pl), map, -beta, -value, depth - 1, d);
 
-        else if (value > best)  //窗口以内找到
+        // 假设验证成功
+        else if (value > best)
             best = value;
-        stepBack(moves[i], pl, map);
+        unmakeMove(moves[i], pl, map);
 
-        //更新alpha以及剪枝
-        // cout << best << endl;
+        // 更新 alpha
         if (best > alpha) alpha = best;
-        if (alpha >= beta) break;  //下界大于等于上界 剪枝
+        // 剪枝
+        if (alpha >= beta) break;
     }
     return best;
 }
@@ -293,110 +284,87 @@ Move Bot::searchStep(Player pl, Chessboard board) {
     Move moves[1232];
     memset(moves, 0, sizeof(moves));
     int i, j;
-    int pos = 0, pos_rival = 0;
+    int pos = 0;
     double value = 0;
 
-    // The first dimension is the no of queen. The second is x or y.
-    // 0-3 is this side while 4-7 the other.
-    int pos_color[8][2];
+    Coordinate pos_color[4];
 
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            if (int(board.at(i, j)) == int(pl)) {
-                pos_color[pos][0] = i;
-                pos_color[pos][1] = j;
-                pos = pos + 1;
-            }
-            if (int(board.at(i, j)) == -int(pl)) {
-                pos_color[pos_rival + 4][0] = i;
-                pos_color[pos_rival + 4][1] = j;
-                pos_rival = pos_rival + 1;
-            }
-        }
-        if (pos == 4 && pos_rival == 4) break;
-    }
-    pos = 0;
-    // 4 queens
+    getPos(board, pl, pos_color);
+    // 4枚棋子
     for (int i = 0; i < 4; i++) {
-        int k, l, len1, len2, x1, x2, y1, y2;
-        // 8 direction of moving
-        for (k = 0; k < 8; k++) {
-            // <8 length of moving
-            for (len1 = 1; len1 < 8; len1++) {
-                // Get new position (x1,y1)
-                x1 = pos_color[i][0] + dx[k] * len1;
-                y1 = pos_color[i][1] + dy[k] * len1;
+        int x1, x2;  // 棋子落点
+        int y1, y2;  // Arrow 落点
+        // 8个方向
+        for (int k = 0; k < 8; k++) {
+            // 不同的移动长度
+            for (int len1 = 1; len1 < 8; len1++) {
+                x1 = pos_color[i].x + dx[k] * len1;
+                y1 = pos_color[i].y + dy[k] * len1;
 
-                // If Arrows or Queens ocuupy the position OR out of range, stop
-                // 'extending'
+                // 遇到障碍便结束
                 if (board.at(x1, y1) != Square::Empty || !inMap(x1, y1)) break;
 
-                // 8 direction of shooting
-                for (l = 0; l < 8; l++) {
-                    // <8 length of shooting
-                    for (len2 = 1; len2 < 8; len2++) {
-                        // Get the position (x2,y2) of the Arrow
+                // 发射 Arrow
+                for (int l = 0; l < 8; l++) {
+                    // 发射长度
+                    for (int len2 = 1; len2 < 8; len2++) {
                         x2 = x1 + dx[l] * len2;
                         y2 = y1 + dy[l] * len2;
 
-                        // If Queens ( Except current Queen which just moved to
-                        // (x1,y1) ) ocuupied OR out of range, stop 'extending'
+                        // 遇到障碍（注意要忽略已经被移走的棋子）结束
                         if (!inMap(x2, y2)) break;
                         if (board.at(x2, y2) != Square::Empty &&
-                            !(pos_color[i][0] == x2 && pos_color[i][1] == y2))
+                            !(pos_color[i].x == x2 && pos_color[i].y == y2))
                             break;
 
-                        // Generating a new move
-                        // cout << value << endl;
-                        moves[pos].x0 = pos_color[i][0];
-                        moves[pos].y0 = pos_color[i][1];
+                        // 生成走法
+                        moves[pos].x0 = pos_color[i].x;
+                        moves[pos].y0 = pos_color[i].y;
                         moves[pos].x1 = x1;
                         moves[pos].y1 = y1;
                         moves[pos].x2 = x2;
                         moves[pos].y2 = y2;
 
-                        // Emulate the steps and calculate the value
-                        procStep(moves[pos], pl, temp_grid);
+                        // 落子，然后计算估值，最后撤回
+                        makeMove(moves[pos], pl, temp_grid);
                         value = evaluation(pl, temp_grid, 0);
-                        stepBack(moves[pos], pl, temp_grid);
+                        unmakeMove(moves[pos], pl, temp_grid);
                         moves[pos++].value = value;
-                        // cout << i << ' ' << value << endl;
                     }
                 }
             }
         }
     }
 
-    // Sort to a decrease form
-    sort(moves, moves + pos);
-    //预先排序
+    // 预先排序，降序搜索，更易优先找到优势走法
+    std::sort(moves, moves + pos, [](Move a, Move b) { return a > b; });
     int t = 0;
-    //我知道我必定搜不了10层 但梦想总是要有的
+    // 尝试搜索10层
     for (int d = 1; d < 10; d++) {
         max_depth = d;
         for (t = 0; t < pos; t++) {
-            if (1000 * clock() / CLOCKS_PER_SEC >= max_time) break;
-            procStep(moves[t], pl, temp_grid);
+            if (1000 * (clock()-start_time) / CLOCKS_PER_SEC >= max_time) break;
+            makeMove(moves[t], pl, temp_grid);
             value = -PVS(pl, temp_grid, -INF, INF, d, d);
             moves[t].value = value;
-            stepBack(moves[t], pl, temp_grid);
+            unmakeMove(moves[t], pl, temp_grid);
         }
-        sort(moves, moves + t);
-        if (1000 * clock() / CLOCKS_PER_SEC >= max_time) break;
+        std::sort(moves, moves + t, [](Move a, Move b) { return a > b; });
+        if (1000 * (clock()-start_time) / CLOCKS_PER_SEC >= max_time) break;
     }
     return moves[0];
 }
 
-Bot::Bot(){
+Bot::Bot() {
     PVS_width = 1.25;
 }
 
 Move Bot::execute(Chessboard board, int turns, Player pl) {
+    start_time=clock();
+    this->turns = turns;
     if (turns == 1)
         max_time = 1960;
     else
         max_time = 960;
-    Move move;
-    move = searchStep(pl, board);
-    return move;
+    return searchStep(pl, board);
 }

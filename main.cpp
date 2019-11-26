@@ -23,13 +23,25 @@ int main() {
                     ui.printBoardBackground();
                     ui.printGame(amazons.getChessboard());
                     Bot bot;
-                    for(int i=1;i<=5;i+=2){
+                    for(int i=1;;i++){
                         getchar();
                         Move move=bot.execute(amazons.getChessboard(),i,Player::White);
+                        //std::cout<<move.x0<<move.y0<<move.x1<<move.y1<<move.x2<<move.y2;
+                        if(amazons.isOver(Player::White)){
+                            std::cout<<"Black win";
+                            system("pause");
+                            break;
+                        }
                         amazons.step(move);
                         ui.printGame(amazons.getChessboard());
                         getchar();
                         move=bot.execute(amazons.getChessboard(),i,Player::Black);
+                        //std::cout<<move.x0<<move.y0<<move.x1<<move.y1<<move.x2<<move.y2;
+                        if(amazons.isOver(Player::Black)){
+                            std::cout<<"White win";
+                            system("pause");
+                            break;
+                        }
                         amazons.step(move);
                         ui.printGame(amazons.getChessboard());
                     }
