@@ -17,15 +17,21 @@ int main() {
             int mode = ui.printModeMenu();
             switch (mode) {
                 case 0:
-                case 1:
+                case 1:{
+                    Amazons amazons;
+                    ui.printBoardBackground();
+                    ui.printGame(amazons.getChessboard());
+                    ui.getMove(amazons.getChessboard(),Player::White);
+                    break;
+                }
                 case 2: {
                     Amazons amazons;
                     ui.printBoardBackground();
                     ui.printGame(amazons.getChessboard());
-                    Bot bot;
+                    Bot bot1(Player::White),bot2(Player::Black);
                     for(int i=1;;i++){
                         getchar();
-                        Move move=bot.execute(amazons.getChessboard(),i,Player::White);
+                        Move move=bot1.execute(amazons.getChessboard(),i);
                         //std::cout<<move.x0<<move.y0<<move.x1<<move.y1<<move.x2<<move.y2;
                         if(amazons.isOver(Player::White)){
                             std::cout<<"Black win";
@@ -33,9 +39,9 @@ int main() {
                             break;
                         }
                         amazons.step(move);
-                        ui.printGame(amazons.getChessboard());
+                        ui.printGame(amazons.getChessboard(),move);
                         getchar();
-                        move=bot.execute(amazons.getChessboard(),i,Player::Black);
+                        move=bot2.execute(amazons.getChessboard(),i);
                         //std::cout<<move.x0<<move.y0<<move.x1<<move.y1<<move.x2<<move.y2;
                         if(amazons.isOver(Player::Black)){
                             std::cout<<"White win";
@@ -43,7 +49,7 @@ int main() {
                             break;
                         }
                         amazons.step(move);
-                        ui.printGame(amazons.getChessboard());
+                        ui.printGame(amazons.getChessboard(),move);
                     }
                     break;
                 }

@@ -355,16 +355,17 @@ Move Bot::searchStep(Player pl, Chessboard board) {
     return moves[0];
 }
 
-Bot::Bot() {
+Bot::Bot(Player player) {
     PVS_width = 1.25;
+    this->player=player;
 }
 
-Move Bot::execute(Chessboard board, int turns, Player pl) {
+Move Bot::execute(Chessboard board, int turns) {
     start_time=clock();
     this->turns = turns;
     if (turns == 1)
         max_time = 1960;
     else
         max_time = 960;
-    return searchStep(pl, board);
+    return searchStep(player, board);
 }

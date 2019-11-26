@@ -17,8 +17,9 @@
 
 class Bot {
 public:
-    Bot();
-    Move execute(Chessboard board, int turns, Player pl);
+    Bot(Player player);
+    Move execute(Chessboard board, int turns);
+    Player player;
 
 private:
     class Coordinate;

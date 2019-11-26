@@ -19,7 +19,9 @@ public:
     UI();
     ~UI();
     void printBoardBackground();
-    void printGame(Chessboard board);
+    void printGame(const Chessboard& board);
+    void printGame(const Chessboard& board,Move lastmove);
+    Move getMove(Chessboard board,Player pl);
     int printMainMenu();
     int printModeMenu();
     enum class Color {
@@ -55,6 +57,12 @@ private:
         "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
         "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
         "└─┴─┴─┴─┴─┴─┴─┴─┘"};
+    inline COORD getCOORD(short x,short y){
+        COORD r;
+        r.X= center_x - 9 + x * 2 + 1;
+        r.Y=y*2+1;
+        return r;
+    }
 };
 
 #endif  // UI_H
