@@ -12,7 +12,8 @@
 #include <conio.h>
 #include <windows.h>
 #include <string>
-#include "amazons.h"
+#include <functional>
+#include "chessboard.h"
 
 class UI {
 public:
@@ -20,10 +21,14 @@ public:
     ~UI();
     void printBoardBackground();
     void printGame(const Chessboard& board);
-    void printGame(const Chessboard& board,Move lastmove);
-    Move getMove(Chessboard board,Player pl);
+    void printGame(const Chessboard& board, Move lastmove);
+    Move getMove(Chessboard board, Player pl);
     int printMainMenu();
     int printModeMenu();
+
+private:
+    HANDLE hOut;
+    CONSOLE_SCREEN_BUFFER_INFO bInfo;
     enum class Color {
         Black,         // 黑
         Blue,          // 蓝
@@ -34,7 +39,7 @@ public:
         Brown,         // 棕
         LightGrey,     // 淡灰
         DarkGrey,      // 深灰
-        LightBlue,     // 淡兰
+        LightBlue,     // 淡蓝
         LightGreen,    // 淡绿
         LightCyan,     // 淡青
         LightRed,      // 淡红
@@ -42,14 +47,20 @@ public:
         Yellow,        // 黄
         White          // 白
     };
-
-private:
-    HANDLE hOut;
-    CONSOLE_SCREEN_BUFFER_INFO bInfo;
     short center_x;
     void clearScreen();
-    void setPos(short x, short y);
-    void setColor(Color foreground, Color background);
+    void setCursorPos(short x, short y);
+    void setPosColor(Color foreground, Color background,short x,short y);
+    void setTextColor(Color foreground, Color background);
+    /**
+     * @brief 在某一棋盘中，用户通过键盘选择某一种格子。
+     * @param board 要选择的棋盘
+     * @param target 要选择的格子种类
+     * @param x 格子坐标 x 
+     * @param y 格子坐标 y
+     * @return 空
+     */
+    void chooseTarget(const Chessboard& board, Square target,int& x,int& y);
     int printMenu(const std::string& title, std::string* choices, short* pos, int num);
     constexpr static const char* boardLine[17] = {
         "┌─┬─┬─┬─┬─┬─┬─┬─┐", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
@@ -57,12 +68,7 @@ private:
         "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
         "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
         "└─┴─┴─┴─┴─┴─┴─┴─┘"};
-    inline COORD getCOORD(short x,short y){
-        COORD r;
-        r.X= center_x - 9 + x * 2 + 1;
-        r.Y=y*2+1;
-        return r;
-    }
+    COORD getCOORD(short x, short y);
 };
 
 #endif  // UI_H

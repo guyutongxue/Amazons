@@ -82,10 +82,7 @@ private:
     int max_time;
     int PVS_width;
 
-    // 判断是否在棋盘内
-    inline bool inMap(int x, int y) {
-        return x >= 0 && x < 8 && y >= 0 && y < 8;
-    }
+    
     //求2的整数次方
     inline int pow2(int n) {
         return n >= 31 ? INT_MAX : 1 << n;

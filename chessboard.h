@@ -24,6 +24,9 @@ public:
     bool operator>(Move b) {
         return value > b.value;
     }
+    Move(){
+        x0=x1=x2=y0=y1=y2=0;
+    }
 
 private:
     double value;
@@ -39,6 +42,11 @@ public:
     Square& at(int x, int y);
     const Square& at(int x, int y) const;
     void print();
+    
+    // 判断是否在棋盘内
+    inline static bool isInside(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8;
+    }
 
 private:
     Square board[8][8];

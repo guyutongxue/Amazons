@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include "amazons.h"
 #include "ui.h"
 #include "bot.h"
 
@@ -16,43 +17,64 @@ int main() {
         if (choice == 0) {
             int mode = ui.printModeMenu();
             switch (mode) {
-                case 0:
-                case 1:{
+                case 0:{
                     Amazons amazons;
+                    Move move;
                     ui.printBoardBackground();
                     ui.printGame(amazons.getChessboard());
+                    Bot bot(Player::Black);
+                    for(int i=1;;i++){
+                        if(amazons.isOver(Player::White)){
+                            std::cout<<"Black win\n";
+                            system("pause");
+                            break;
+                        }
+                        move=ui.getMove(amazons.getChessboard(),Player::White);
+                        amazons.step(move);
+                        ui.printGame(amazons.getChessboard(),move);
+
+                        if(amazons.isOver(Player::Black)){
+                            std::cout<<"White win\n";
+                            system("pause");
+                            break;
+                        }
+                        move=bot.execute(amazons.getChessboard(),i);
+                        amazons.step(move);
+                        ui.printGame(amazons.getChessboard(),move);
+                    }
                     ui.getMove(amazons.getChessboard(),Player::White);
                     break;
                 }
-                case 2: {
+                case 1: {
                     Amazons amazons;
+                    Move move;
                     ui.printBoardBackground();
                     ui.printGame(amazons.getChessboard());
                     Bot bot1(Player::White),bot2(Player::Black);
                     for(int i=1;;i++){
                         getchar();
-                        Move move=bot1.execute(amazons.getChessboard(),i);
-                        //std::cout<<move.x0<<move.y0<<move.x1<<move.y1<<move.x2<<move.y2;
                         if(amazons.isOver(Player::White)){
-                            std::cout<<"Black win";
+                            std::cout<<"Black win\n";
                             system("pause");
                             break;
                         }
+                        move=bot1.execute(amazons.getChessboard(),i);
                         amazons.step(move);
                         ui.printGame(amazons.getChessboard(),move);
+
                         getchar();
-                        move=bot2.execute(amazons.getChessboard(),i);
-                        //std::cout<<move.x0<<move.y0<<move.x1<<move.y1<<move.x2<<move.y2;
                         if(amazons.isOver(Player::Black)){
-                            std::cout<<"White win";
+                            std::cout<<"White win\n";
                             system("pause");
                             break;
                         }
+                        move=bot2.execute(amazons.getChessboard(),i);
                         amazons.step(move);
                         ui.printGame(amazons.getChessboard(),move);
                     }
                     break;
                 }
+                case 2:
                 case 3:
                     break;
                 default:

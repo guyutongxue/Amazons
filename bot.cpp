@@ -48,7 +48,7 @@ void Bot::kingMove(Player pl, const Chessboard& map, int kd[8][8]) {
             for (int j = 0; j < 8; j++) {
                 int nx = p.x + dx[j], ny = p.y + dy[j];
                 // 判断是否为空以及是否需要更新（比原先的要小）
-                if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
                     kd[nx][ny] > kd[p.x][p.y] + 1) {
                     // 入列并更新值
                     que.push(Coordinate(nx, ny));
@@ -82,7 +82,7 @@ void Bot::queenMove(Player pl, const Chessboard& map, int qd[8][8]) {
                 for (int step = 1; step < 8; step++) {
                     int nx = p.x + dx[j] * step, ny = p.y + dy[j] * step;
                     // 判断是否为空以及是否需要更新（比原先的要小）
-                    if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                    if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
                         qd[nx][ny] > qd[p.x][p.y] + 1) {
                         // 入列并更新值
                         que.push(Coordinate(nx, ny));
@@ -142,7 +142,7 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
             if (map.at(i, j) == Square::Empty) {
                 // 记录八个方向上的相邻空格
                 for (int m = 0; m < 8; m++) {
-                    if (inMap(i + dx[m], j + dy[m]) &&
+                    if (Chessboard::isInside(i + dx[m], j + dy[m]) &&
                         map.at(i + dx[m], j + dy[m]) == Square::Empty)
                         emptyblocks[i][j]++;
                 }
@@ -164,7 +164,8 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
                 // 当前移动到的位置 (nx,ny)
                 int nx = pos_white[j].x + dx[i] * step, ny = pos_white[j].y + dy[i] * step;
                 // 遇到障碍停止
-                if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty && q_w[nx][ny] != INF) {
+                if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                    q_w[nx][ny] != INF) {
                     m_w += (double)emptyblocks[nx][ny] / (double)step;
                 } else
                     break;
@@ -176,7 +177,8 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
         for (int i = 0; i < 8; i++) {
             for (int step = 1; step < 8; step++) {
                 int nx = pos_black[j].x + dx[i] * step, ny = pos_black[j].y + dy[i] * step;
-                if (inMap(nx, ny) && map.at(nx, ny) == Square::Empty && q_b[nx][ny] != INF) {
+                if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                    q_b[nx][ny] != INF) {
                     m_b += (double)emptyblocks[nx][ny] / (double)step;
                 } else
                     break;
@@ -202,7 +204,7 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
 }
 
 double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth, int d) {
-    if (depth == 0 || 1000 * (clock()-start_time) / CLOCKS_PER_SEC >= max_time) {
+    if (depth == 0 || 1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) {
         return evaluation(pl, map, (d - depth) / 2);
     }
     Move moves[1500];
@@ -220,12 +222,12 @@ double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth,
             for (len1 = 1; len1 < 8; len1++) {
                 x1 = pos_color[i].x + dx[k] * len1;
                 y1 = pos_color[i].y + dy[k] * len1;
-                if (map.at(x1, y1) != Square::Empty || !inMap(x1, y1)) break;
+                if (map.at(x1, y1) != Square::Empty || !Chessboard::isInside(x1, y1)) break;
                 for (l = 0; l < 8; l++) {
                     for (len2 = 1; len2 < 8; len2++) {
                         x2 = x1 + dx[l] * len2;
                         y2 = y1 + dy[l] * len2;
-                        if (!inMap(x2, y2)) break;
+                        if (!Chessboard::isInside(x2, y2)) break;
                         if (map.at(x1, y1) != Square::Empty &&
                             !(pos_color[i].x == x2 && pos_color[i].y == y2))
                             break;
@@ -302,7 +304,7 @@ Move Bot::searchStep(Player pl, Chessboard board) {
                 y1 = pos_color[i].y + dy[k] * len1;
 
                 // 遇到障碍便结束
-                if (board.at(x1, y1) != Square::Empty || !inMap(x1, y1)) break;
+                if (board.at(x1, y1) != Square::Empty || !Chessboard::isInside(x1, y1)) break;
 
                 // 发射 Arrow
                 for (int l = 0; l < 8; l++) {
@@ -312,7 +314,7 @@ Move Bot::searchStep(Player pl, Chessboard board) {
                         y2 = y1 + dy[l] * len2;
 
                         // 遇到障碍（注意要忽略已经被移走的棋子）结束
-                        if (!inMap(x2, y2)) break;
+                        if (!Chessboard::isInside(x2, y2)) break;
                         if (board.at(x2, y2) != Square::Empty &&
                             !(pos_color[i].x == x2 && pos_color[i].y == y2))
                             break;
@@ -343,25 +345,25 @@ Move Bot::searchStep(Player pl, Chessboard board) {
     for (int d = 1; d < 10; d++) {
         max_depth = d;
         for (t = 0; t < pos; t++) {
-            if (1000 * (clock()-start_time) / CLOCKS_PER_SEC >= max_time) break;
+            if (1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
             makeMove(moves[t], pl, temp_grid);
             value = -PVS(pl, temp_grid, -INF, INF, d, d);
             moves[t].value = value;
             unmakeMove(moves[t], pl, temp_grid);
         }
         std::sort(moves, moves + t, [](Move a, Move b) { return a > b; });
-        if (1000 * (clock()-start_time) / CLOCKS_PER_SEC >= max_time) break;
+        if (1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
     }
     return moves[0];
 }
 
 Bot::Bot(Player player) {
     PVS_width = 1.25;
-    this->player=player;
+    this->player = player;
 }
 
 Move Bot::execute(Chessboard board, int turns) {
-    start_time=clock();
+    start_time = clock();
     this->turns = turns;
     if (turns == 1)
         max_time = 1960;
