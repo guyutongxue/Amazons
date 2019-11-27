@@ -128,17 +128,18 @@ void UI::printGame(const Chessboard& board) {
 
 void UI::printGame(const Chessboard& board, Move lastmove) {
     printGame(board);
-    setPosColor(Color::Black, Color::LightGrey, lastmove.x1,lastmove.y1);
-    setPosColor(Color::Black, Color::LightGrey, lastmove.x2,lastmove.y2);
+    setPosColor(Color::Black, Color::LightGrey, lastmove.x1, lastmove.y1);
+    setPosColor(Color::Black, Color::LightGrey, lastmove.x2, lastmove.y2);
 }
 
-Move UI::getMove(Chessboard board, Player pl) {
+bool UI::generateMove(Chessboard board, Player pl, Move& move) {
     int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
     int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
     bool avail[8][8];
     auto isAmazon = [&board, &pl](int x, int y) -> bool { return board.at(x, y) == (Square)pl; };
-    auto isStep=[&avail](int x,int y)->bool{return avail[x][y];};
-    auto chooseTarget = [&](int& x, int& y,std::function<bool(int,int)> judge,Color recall) mutable -> void {
+    auto isStep = [&avail](int x, int y) -> bool { return avail[x][y]; };
+    auto chooseTarget = [&](int& x, int& y, std::function<bool(int, int)> judge,
+                            Color recall) mutable -> bool {
         setPosColor(Color::Black, Color::Brown, x, y);
         int keycode;
         while (keycode = getch(), keycode != 13) {
@@ -149,6 +150,9 @@ Move UI::getMove(Chessboard board, Player pl) {
             }
             setPosColor(Color::Black, recall, x, y);
             switch (keycode) {
+                case 27: {  // Esc
+                    return false;
+                }
                 case '8':
                 case 'W':
                 case 'w':  // up
@@ -214,93 +218,107 @@ Move UI::getMove(Chessboard board, Player pl) {
                     break;
                 }
                 case '7':
-                case 'Q': // LU
-                case 'q':{
-                    if(judge(x-1,y-1))x--,y--;
+                case 'Q':  // LU
+                case 'q': {
+                    if (judge(x - 1, y - 1)) x--, y--;
                     break;
                 }
                 case '9':
-                case 'E': // RU
-                case 'e':{
-                    if(judge(x+1,y-1))x++,y--;
+                case 'E':  // RU
+                case 'e': {
+                    if (judge(x + 1, y - 1)) x++, y--;
                     break;
                 }
                 case '1':
-                case 'Z': // LD
-                case 'z':{
-                    if(judge(x-1,y+1))x--,y++;
+                case 'Z':  // LD
+                case 'z': {
+                    if (judge(x - 1, y + 1)) x--, y++;
                     break;
                 }
                 case '3':
-                case 'C': // RD
-                case 'c':{
-                    if(judge(x+1,y+1))x++,y++;
+                case 'C':  // RD
+                case 'c': {
+                    if (judge(x + 1, y + 1)) x++, y++;
                     break;
                 }
             }
             setPosColor(Color::Black, Color::Brown, x, y);
         }
+        return true;
     };
-    Move move;
-    // 获取第一个棋子的位置
     int x, y;
-    bool firstFound = false;
-    for (y = 0; !firstFound && y < 8; y++) {
-        for (x = 0; !firstFound && x < 8; x++) {
-            if (isAmazon(x, y)) firstFound = true;
-        }
-    }
-    move.x0 = x - 1;
-    move.y0 = y - 1;
-    chooseTarget(move.x0, move.y0,isAmazon,Color::White);
-    printGame(board);
+    bool firstFound;
+    Chessboard backup=board;
+    do {      // 选择 Arrows 位置的循环（若取消退回）
+        do {  // 选择落子位置的循环（若取消退回）
+            // 恢复初始盘面
+            board=backup;
+            printGame(board);
 
-    firstFound=false;
-    std::memset(avail,false,sizeof(avail));
-    for (int i = 0; i < 8; i++) {
-        for (int len = 1; len < 8; len++) {
-            move.x1=move.x0 + len * dx[i];
-            move.y1=move.y0 + len * dy[i];
-            if (board.at(move.x1,move.y1) != Square::Empty || !Chessboard::isInside(move.x1, move.y1)) break;
-            avail[move.x1][move.y1]=true;
-            if(!firstFound){
-                firstFound=true;
-                x=move.x1;
-                y=move.y1;
+            firstFound=false;
+            // 获取第一个棋子的位置
+            for (y = 0; !firstFound && y < 8; y++) {
+                for (x = 0; !firstFound && x < 8; x++) {
+                    if (isAmazon(x, y)) firstFound = true;
+                }
             }
-            setPosColor(Color::Black,Color::LightCyan,move.x1,move.y1);
-        }
-    }
-    move.x1=x;
-    move.y1=y;
-    chooseTarget(move.x1,move.y1,isStep,Color::LightCyan);
-    board.at(move.x0,move.y0)=Square::Empty;
-    board.at(move.x1,move.y1)=Square(pl);
-    printGame(board);
+            move.x0 = x - 1;
+            move.y0 = y - 1;
+            if (!chooseTarget(move.x0, move.y0, isAmazon, Color::White)) {
+                return false;
+            }
+            printGame(board);
 
-    firstFound=false;
-    std::memset(avail,false,sizeof(avail));
-    for (int i = 0; i < 8; i++) {
-        for (int len = 1; len < 8; len++) {
-            move.x2=move.x1 + len * dx[i];
-            move.y2=move.y1 + len * dy[i];
-            if (board.at(move.x2,move.y2) != Square::Empty || !Chessboard::isInside(move.x2, move.y2)) break;
-            avail[move.x2][move.y2]=true;
-            if(!firstFound){
-                firstFound=true;
-                x=move.x2;
-                y=move.y2;
+            firstFound = false;
+            std::memset(avail, false, sizeof(avail));
+            for (int i = 0; i < 8; i++) {
+                for (int len = 1; len < 8; len++) {
+                    move.x1 = move.x0 + len * dx[i];
+                    move.y1 = move.y0 + len * dy[i];
+                    if (board.at(move.x1, move.y1) != Square::Empty ||
+                        !Chessboard::isInside(move.x1, move.y1))
+                        break;
+                    avail[move.x1][move.y1] = true;
+                    if (!firstFound) {
+                        firstFound = true;
+                        x = move.x1;
+                        y = move.y1;
+                    }
+                    setPosColor(Color::Black, Color::LightCyan, move.x1, move.y1);
+                }
             }
-            setPosColor(Color::Black,Color::LightCyan,move.x2,move.y2);
+            move.x1 = x;
+            move.y1 = y;
+        } while (!chooseTarget(move.x1, move.y1, isStep, Color::LightCyan));
+        board.at(move.x0, move.y0) = Square::Empty;
+        board.at(move.x1, move.y1) = Square(pl);
+        printGame(board);
+
+        firstFound = false;
+        std::memset(avail, false, sizeof(avail));
+        for (int i = 0; i < 8; i++) {
+            for (int len = 1; len < 8; len++) {
+                move.x2 = move.x1 + len * dx[i];
+                move.y2 = move.y1 + len * dy[i];
+                if (board.at(move.x2, move.y2) != Square::Empty ||
+                    !Chessboard::isInside(move.x2, move.y2))
+                    break;
+                avail[move.x2][move.y2] = true;
+                if (!firstFound) {
+                    firstFound = true;
+                    x = move.x2;
+                    y = move.y2;
+                }
+                setPosColor(Color::Black, Color::LightCyan, move.x2, move.y2);
+            }
         }
-    }
-    move.x2=x;
-    move.y2=y;
-    chooseTarget(move.x2,move.y2,isStep,Color::LightCyan);
+        move.x2 = x;
+        move.y2 = y;
+    } while (!chooseTarget(move.x2, move.y2, isStep, Color::LightCyan));
 
     // std::cout<<move.x0<<move.y0<<move.x1<<move.y1<<move.x2<<move.y2;
     // system("pause");
-    return move;
+    return true;
 }
 
 void UI::setCursorPos(short x, short y) {

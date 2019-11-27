@@ -22,7 +22,7 @@ public:
     void printBoardBackground();
     void printGame(const Chessboard& board);
     void printGame(const Chessboard& board, Move lastmove);
-    Move getMove(Chessboard board, Player pl);
+    bool generateMove(Chessboard board, Player pl,Move& move);
     int printMainMenu();
     int printModeMenu();
 

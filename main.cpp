@@ -29,7 +29,7 @@ int main() {
                             system("pause");
                             break;
                         }
-                        move=ui.getMove(amazons.getChessboard(),Player::White);
+                        if(!ui.generateMove(amazons.getChessboard(),Player::White,move))break;
                         amazons.step(move);
                         ui.printGame(amazons.getChessboard(),move);
 
@@ -42,7 +42,6 @@ int main() {
                         amazons.step(move);
                         ui.printGame(amazons.getChessboard(),move);
                     }
-                    ui.getMove(amazons.getChessboard(),Player::White);
                     break;
                 }
                 case 1: {
