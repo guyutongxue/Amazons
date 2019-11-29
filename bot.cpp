@@ -6,12 +6,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-//*****************************//
-//      Amazons kksk_R by      //
-//    Mt_Nomad & 12f23eddde    //
-//        Version 1917+        //
-//*****************************//
-
 #include "bot.h"
 
 void Bot::getPos(const Chessboard& map, Player pl, Coordinate pos[4]) {
@@ -38,7 +32,7 @@ void Bot::kingMove(Player pl, const Chessboard& map, int kd[8][8]) {
     // 对每一个棋子进行广度优先搜索
     for (int i = 0; i < 4; i++) {
         // 起点入列
-        que.push(Coordinate(pos[i].x, pos[i].y));
+        que.push(pos[i]);
         kd[pos[i].x][pos[i].y] = 0;
         while (!que.empty()) {
             // 首元素出列
@@ -70,7 +64,7 @@ void Bot::queenMove(Player pl, const Chessboard& map, int qd[8][8]) {
     // 对每一个棋子进行广度优先搜索
     for (int i = 0; i < 4; i++) {
         // 起点入列
-        que.push(Coordinate(pos[i].x, pos[i].y));
+        que.push(pos[i]);
         qd[pos[i].x][pos[i].y] = 0;
         while (!que.empty()) {
             // 弹出首元素
@@ -96,7 +90,7 @@ void Bot::queenMove(Player pl, const Chessboard& map, int qd[8][8]) {
 }
 
 double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
-    search_count++;
+    // search_count++;
     int k_w[8][8], k_b[8][8], q_w[8][8], q_b[8][8];
     kingMove(Player::Black, map, k_b);
     kingMove(Player::White, map, k_w);
@@ -113,7 +107,7 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
             if (q_b[i][j] == INF && q_b[i][j] == q_w[i][j])
                 t1 += 0;
             else if (q_b[i][j] != INF && q_b[i][j] == q_w[i][j])
-                t1 += firstHandAdvantage;
+                t1 += -firstHandAdvantage;
             else if (q_w[i][j] < q_b[i][j])
                 t1 += 1;
             else
@@ -123,7 +117,7 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
             if (k_b[i][j] == INF && k_b[i][j] == k_w[i][j])
                 t2 += 0;
             else if (k_b[i][j] != INF && k_b[i][j] == k_w[i][j])
-                t2 += firstHandAdvantage;
+                t2 += -firstHandAdvantage;
             else if (k_w[i][j] < k_b[i][j])
                 t2 += 1;
             else
@@ -203,11 +197,11 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
         return value;
 }
 
-double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth, int d) {
-    if (depth == 0 || 1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) {
+double Bot::PVS(Player pl, Chessboard& map, double alpha, double beta, int depth, int d) {
+    if (depth == 0 || 1000 * (std::clock() - start_time) / CLOCKS_PER_SEC >= max_time) {
         return evaluation(pl, map, (d - depth) / 2);
     }
-    Move moves[1500];
+    Move moves[3000];
     memset(moves, 0, sizeof(moves));
     int pos = 0;
     double value = 0;
@@ -278,11 +272,9 @@ double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth,
 
 //单独把第一层的搜索做成一个函数 为了预先排序
 //因为第二层大概率搜不完 并且这一层不是返回估值而是走法
-Move Bot::searchStep(Player pl, const Chessboard& board) {
-
+Move Bot::searchStep(Player pl, Chessboard& board) {
     // Initialize moves' array
-    Move moves[1232];
-    memset(moves, 0, sizeof(moves));
+    Move moves[3000];
     int pos = 0;
     double value = 0;
 
@@ -291,8 +283,8 @@ Move Bot::searchStep(Player pl, const Chessboard& board) {
     getPos(board, pl, pos_color);
     // 4枚棋子
     for (int i = 0; i < 4; i++) {
-        int x1, x2;  // 棋子落点
-        int y1, y2;  // Arrow 落点
+        int x1, y1;  // 棋子落点
+        int x2, y2;  // Arrow 落点
         // 8个方向
         for (int k = 0; k < 8; k++) {
             // 不同的移动长度
@@ -340,16 +332,16 @@ Move Bot::searchStep(Player pl, const Chessboard& board) {
     int t = 0;
     // 尝试搜索10层
     for (int d = 1; d < 10; d++) {
-        max_depth = d;
+        // max_depth = d;
         for (t = 0; t < pos; t++) {
-            if (1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
+            if (1000 * (std::clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
             makeMove(moves[t], pl, board);
             value = -PVS(pl, board, -INF, INF, d, d);
             moves[t].value = value;
             unmakeMove(moves[t], pl, board);
         }
         std::sort(moves, moves + t, [](Move a, Move b) { return a > b; });
-        if (1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
+        if (1000 * (std::clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
     }
     return moves[0];
 }
@@ -360,7 +352,7 @@ Bot::Bot(Player player) {
 }
 
 Move Bot::execute(Chessboard board, int turns) {
-    start_time = clock();
+    start_time = std::clock();
     this->turns = turns;
     if (turns == 1)
         max_time = 1960;

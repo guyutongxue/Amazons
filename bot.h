@@ -28,7 +28,6 @@ private:
     constexpr static const int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
     constexpr static const int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
-    
     // The parameter of calculating 'value' in formula
     // 调整参数 res=f1*t1+f2*t2+f3*c1+f4*c2+f5*m
     constexpr static const double f1[23] = {0.1080, 0.1080, 0.1235, 0.1332, 0.1400, 0.1468,
@@ -56,49 +55,55 @@ private:
     // typedef std::pair<int, int> PAIR;
     constexpr static const int INF = INT16_MAX;
     void getPos(const Chessboard& map, Player pl, Coordinate pos[4]);
-    Move searchStep(Player pl, const Chessboard& board);
+    Move searchStep(Player pl, Chessboard& board);
     //对某一个棋盘，计算某一方棋子的queenmove数
     void queenMove(Player pl, const Chessboard& map, int qd[8][8]);
+
     //对某一个棋盘，计算某一方棋子的Kingmove数
     void kingMove(Player pl, const Chessboard& map, int kd[8][8]);
 
     double evaluation(Player pl, const Chessboard& board, const int turns);
+
     /**
-     * @brief Use PVS algorithm to calculate value?
-     * @param color The color of placing Queen
-     * @param map   The grid
-     * @param alpha The minimum
-     * @param beta  The maximum
-     * @param depth The depth remainder
-     * @param d     ?
-     * @return The value.
+     * @brief 使用 PVS 算法取得当前节点的估值。
+     * @param pl    执棋玩家。
+     * @param map   当前棋盘。
+     * @param alpha 下界 alpha 。
+     * @param beta  上界 beta 。
+     * @param depth 剩余深度。
+     * @param d     总深度。
+     * @return 取得的估值大小。
      */
-    double PVS(Player pl, Chessboard map, double alpha, double beta, int depth, int d);
+    double PVS(Player pl, Chessboard& map, double alpha, double beta, int depth, int d);
 
     int turns;
-    int max_depth;
-    clock_t start_time;
-    int search_count;
+    std::clock_t start_time;
     int max_time;
     int PVS_width;
 
-    
     //求2的整数次方
     inline int pow2(int n) {
         return n >= 31 ? INT_MAX : 1 << n;
     }
-    // 在temp_grid中落子
-    inline void makeMove(Move a, Player pl, Chessboard board) {
+    
+    /**
+     * @brief 在某棋盘上执行某一落子。
+     * @param a 要执行的落子信息。
+     * @param pl 执棋玩家。
+     * @param board 当前棋盘。
+     * @return 空。
+    */
+    inline void makeMove(Move a, Player pl, Chessboard& board) {
         board.at(a.x0, a.y0) = Square::Empty;
         board.at(a.x1, a.y1) = (Square)pl;
         board.at(a.x2, a.y2) = Square::Arrow;
     }
 
     //恢复到上一步
-    inline void unmakeMove(Move a, Player pl, Chessboard board) {
-        board.at(a.x0, a.y0) = Square::Empty;
+    inline void unmakeMove(Move a, Player pl, Chessboard& board) {
         board.at(a.x1, a.y1) = Square::Empty;
-        board.at(a.x2, a.y2) = (Square)pl;
+        board.at(a.x2, a.y2) = Square::Empty;
+        board.at(a.x0, a.y0) = (Square)pl;
     }
 };
 
@@ -106,7 +111,9 @@ class Bot::Coordinate {
 public:
     int x;
     int y;
-    Coordinate() {}
+    Coordinate() {
+        x = y = 0;
+    }
     Coordinate(int x, int y) {
         this->x = x;
         this->y = y;

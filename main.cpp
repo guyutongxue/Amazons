@@ -22,19 +22,19 @@ int main() {
                     Move move;
                     ui.printBoardBackground();
                     ui.printGame(amazons.getChessboard());
-                    Bot bot(Player::Black);
+                    Bot bot(Player::White);
                     for(int i=1;;i++){
-                        if(amazons.isOver(Player::White)){
-                            std::cout<<"Black win\n";
+                        if(amazons.isOver(Player::Black)){
+                            std::cout<<"White win\n";
                             system("pause");
                             break;
                         }
-                        if(!ui.generateMove(amazons.getChessboard(),Player::White,move))break;
+                        if(!ui.generateMove(amazons.getChessboard(),Player::Black,move))break;
                         amazons.step(move);
                         ui.printGame(amazons.getChessboard(),move);
 
-                        if(amazons.isOver(Player::Black)){
-                            std::cout<<"White win\n";
+                        if(amazons.isOver(Player::White)){
+                            std::cout<<"Black win\n";
                             system("pause");
                             break;
                         }
@@ -49,11 +49,11 @@ int main() {
                     Move move;
                     ui.printBoardBackground();
                     ui.printGame(amazons.getChessboard());
-                    Bot bot1(Player::White),bot2(Player::Black);
+                    Bot bot1(Player::Black),bot2(Player::White);
                     for(int i=1;;i++){
                         getchar();
-                        if(amazons.isOver(Player::White)){
-                            std::cout<<"Black win\n";
+                        if(amazons.isOver(Player::Black)){
+                            std::cout<<"White win\n";
                             system("pause");
                             break;
                         }
@@ -62,8 +62,8 @@ int main() {
                         ui.printGame(amazons.getChessboard(),move);
 
                         getchar();
-                        if(amazons.isOver(Player::Black)){
-                            std::cout<<"White win\n";
+                        if(amazons.isOver(Player::White)){
+                            std::cout<<"Black win\n";
                             system("pause");
                             break;
                         }
