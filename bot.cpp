@@ -14,7 +14,7 @@
 
 #include "bot.h"
 
-void Bot::getPos(Chessboard map, Player pl, Coordinate pos[4]) {
+void Bot::getPos(const Chessboard& map, Player pl, Coordinate pos[4]) {
     int counter = 0;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -278,14 +278,11 @@ double Bot::PVS(Player pl, Chessboard map, double alpha, double beta, int depth,
 
 //单独把第一层的搜索做成一个函数 为了预先排序
 //因为第二层大概率搜不完 并且这一层不是返回估值而是走法
-Move Bot::searchStep(Player pl, Chessboard board) {
-    // Get a copy of original grid
-    Chessboard temp_grid = board;
+Move Bot::searchStep(Player pl, const Chessboard& board) {
 
     // Initialize moves' array
     Move moves[1232];
     memset(moves, 0, sizeof(moves));
-    int i, j;
     int pos = 0;
     double value = 0;
 
@@ -328,9 +325,9 @@ Move Bot::searchStep(Player pl, Chessboard board) {
                         moves[pos].y2 = y2;
 
                         // 落子，然后计算估值，最后撤回
-                        makeMove(moves[pos], pl, temp_grid);
-                        value = evaluation(pl, temp_grid, 0);
-                        unmakeMove(moves[pos], pl, temp_grid);
+                        makeMove(moves[pos], pl, board);
+                        value = evaluation(pl, board, 0);
+                        unmakeMove(moves[pos], pl, board);
                         moves[pos++].value = value;
                     }
                 }
@@ -346,10 +343,10 @@ Move Bot::searchStep(Player pl, Chessboard board) {
         max_depth = d;
         for (t = 0; t < pos; t++) {
             if (1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
-            makeMove(moves[t], pl, temp_grid);
-            value = -PVS(pl, temp_grid, -INF, INF, d, d);
+            makeMove(moves[t], pl, board);
+            value = -PVS(pl, board, -INF, INF, d, d);
             moves[t].value = value;
-            unmakeMove(moves[t], pl, temp_grid);
+            unmakeMove(moves[t], pl, board);
         }
         std::sort(moves, moves + t, [](Move a, Move b) { return a > b; });
         if (1000 * (clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;

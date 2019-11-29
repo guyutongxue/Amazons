@@ -48,6 +48,8 @@ public:
         return x >= 0 && x < 8 && y >= 0 && y < 8;
     }
 
+    friend class Bot;
+
 private:
     Square board[8][8];
 };

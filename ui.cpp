@@ -59,9 +59,9 @@ int UI::printMenu(const std::string& title, std::string* choices, short* pos, in
     // 选中第0选项
     FillConsoleOutputAttribute(hOut, 0xF0, 15, COORD{short(center_x - 7), pos[currentChoice]},
                                &buffer);
-    while (keycode = getch(), keycode != 13) {
+    while (keycode = _getch(), keycode != 13) {
         if (keycode == 0 || keycode == 0xE0) {
-            keycode = getch();
+            keycode = _getch();
             keycode += 300;
         }
         if (keycode >= '1' && keycode <= num + 1 + '0') {
@@ -136,21 +136,27 @@ bool UI::generateMove(Chessboard board, Player pl, Move& move) {
     int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
     int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
     bool avail[8][8];
-    auto isAmazon = [&board, &pl](int x, int y) -> bool { return board.at(x, y) == (Square)pl; };
-    auto isStep = [&avail](int x, int y) -> bool { return avail[x][y]; };
+    auto isAmazon = [&board, &pl](int x, int y) -> bool {
+        return Chessboard::isInside(x, y) && board.at(x, y) == (Square)pl;
+    };
+    auto isStep = [&avail](int x, int y) -> bool {
+        return Chessboard::isInside(x, y) && avail[x][y];
+    };
     auto chooseTarget = [&](int& x, int& y, std::function<bool(int, int)> judge,
                             Color recall) mutable -> bool {
         setPosColor(Color::Black, Color::Brown, x, y);
         int keycode;
-        while (keycode = getch(), keycode != 13) {
+        while (keycode = _getch(), keycode != 13) {
             if (keycode == 0 || keycode == 0xE0) {
-                keycode = getch();
+                keycode = _getch();
                 // 若是方向键或功能键，键值加 300 以防冲突
                 keycode += 300;
             }
             setPosColor(Color::Black, recall, x, y);
             switch (keycode) {
                 case 27: {  // Esc
+                    // 底色填充为白色
+                    printGame(board);
                     return false;
                 }
                 case '8':
@@ -248,14 +254,13 @@ bool UI::generateMove(Chessboard board, Player pl, Move& move) {
     };
     int x, y;
     bool firstFound;
-    Chessboard backup=board;
+    Chessboard backup = board;
     do {      // 选择 Arrows 位置的循环（若取消退回）
         do {  // 选择落子位置的循环（若取消退回）
             // 恢复初始盘面
-            board=backup;
-            printGame(board);
+            board = backup;
 
-            firstFound=false;
+            firstFound = false;
             // 获取第一个棋子的位置
             for (y = 0; !firstFound && y < 8; y++) {
                 for (x = 0; !firstFound && x < 8; x++) {
