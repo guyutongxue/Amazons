@@ -26,6 +26,8 @@ public:
     int printMainMenu();
     int printModeMenu();
     int printPauseMenu();
+    std::string printSL();
+    void printSLMsg(bool isSuccess);
     void printEnd(Piece winner);
 
 private:
@@ -54,6 +56,7 @@ private:
     void setCursorPos(short x, short y);
     void setPosColor(Color foreground, Color background, short x, short y);
     void setTextColor(Color foreground, Color background);
+    
     /**
      * @brief 在某一棋盘中，用户通过键盘选择某一种格子。
      * @param board 要选择的棋盘
@@ -64,6 +67,8 @@ private:
      */
     void chooseTarget(const Chessboard& board, Square target, int& x, int& y);
     int printMenu(const std::string& title, std::string* choices, short* pos, int num);
+    std::string printInputField(short x,short y,short length,std::string prompt);
+    void printMessage(short x,short y,std::string text,bool isWarning);
     constexpr static const char* boardLine[17] = {
         "┌───┬───┬───┬───┬───┬───┬───┬───┐", "│   │   │   │   │   │   │   │   │",
         "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",

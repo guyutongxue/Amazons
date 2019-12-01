@@ -19,14 +19,15 @@ enum class GameMode { HumanBot = 0, BotHuman = 1, BotBot = 2, HumanHuman = 3 };
 
 class Amazons {
 public:
-    Amazons(GameMode gamemode);
     Amazons();
     ~Amazons();
     bool isOver;
     Piece winner;
     const Chessboard& getChessboard();
     void play(UI* pUi);
-    void save()const;
+    bool save(std::string path)const;
+    bool load(std::string path);
+    void setGameMode(GameMode gamemode);
 
 private:
     Chessboard chessboard;

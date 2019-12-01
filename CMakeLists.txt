@@ -9,8 +9,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 PROJECT(amazons)
 
 SET(CMAKE_CXX_STANDARD 17)
-ADD_COMPILE_OPTIONS(-finput-charset=UTF-8)
-ADD_COMPILE_OPTIONS(-fexec-charset=UTF-8)
+ADD_COMPILE_OPTIONS(-static-libstdc++ -finput-charset=UTF-8 -fexec-charset=UTF-8)
 ADD_COMPILE_OPTIONS(-ggdb)
 # ADD_COMPILE_OPTIONS(-O2)
 

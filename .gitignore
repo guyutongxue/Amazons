@@ -62,3 +62,10 @@ _deps
 #############
 
 reference
+sample
+
+###################
+# Amazons Profile #
+###################
+
+*.amz

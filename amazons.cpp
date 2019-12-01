@@ -8,16 +8,21 @@
 
 #include "amazons.h"
 
-Amazons::Amazons(GameMode gamemode) {
+Amazons::Amazons() {
     chessboard = Chessboard::start;
-    gameMode = gamemode;
+    gameMode=GameMode::BotHuman;
     firstHand = Piece::Black;
     isOver = false;
     turns = 1;
 }
 
-Amazons::Amazons(){
-    std::ifstream input("backup.amz",std::ios::binary);
+void Amazons::setGameMode(GameMode gamemode){
+    gameMode=gamemode;
+}
+
+bool Amazons::load(std::string path){
+    std::ifstream input(path,std::ios::binary);
+    if(input.fail())return false;
     char a,b;
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
@@ -30,8 +35,8 @@ Amazons::Amazons(){
     firstHand=(Piece)(int(b));
     input.read((char*)&turns,sizeof(int));
     input.close();
-    std::cout<<turns;
     isOver=false;
+    return true;
 }
 
 Amazons::~Amazons() {}
@@ -139,8 +144,9 @@ void Amazons::_play(IPlayer* black, IPlayer* white, UI* pUi) {
     }
 }
 
-void Amazons::save() const {
-    std::ofstream output("backup.amz", std::ios::binary | std::ios::trunc);
+bool Amazons::save(std::string path) const {
+    std::ofstream output(path, std::ios::binary | std::ios::trunc);
+    if(output.fail())return false;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             output << char(int(chessboard.at(i, j)));
@@ -149,4 +155,5 @@ void Amazons::save() const {
     output << char(int(gameMode)) << char(int(firstHand));
     output.write((char*)&turns, sizeof(int));
     output.close();
+    return true;
 }

@@ -55,6 +55,7 @@ int UI::printModeMenu() {
 
 int UI::printMenu(const std::string& title, std::string* choices, short* pos, int num) {
     clearScreen();
+    setTextColor(Color::White, Color::Black);
     setCursorPos(center_x - 4, 0);
     std::cout << title;
     for (int i = 0; i < num; i++) {
@@ -98,10 +99,12 @@ int UI::printMenu(const std::string& title, std::string* choices, short* pos, in
 }
 
 void UI::printEnd(Piece winner) {
-    setCursorPos(center_x-10,21);
-    if(winner==Piece::Black)std::cout<<"黑方";
-    else std::cout<<"白方";
-    std::cout<<"胜利。";
+    setCursorPos(center_x - 10, 21);
+    if (winner == Piece::Black)
+        std::cout << "黑方";
+    else
+        std::cout << "白方";
+    std::cout << "胜利。";
     _getch();
 }
 
@@ -149,6 +152,58 @@ void UI::printGame(const Chessboard& board, Move lastmove) {
     printGame(board);
     setPosColor(Color::Black, Color::LightGrey, lastmove.x1, lastmove.y1);
     setPosColor(Color::Black, Color::LightGrey, lastmove.x2, lastmove.y2);
+}
+
+std::string UI::printSL() {
+    std::string result =
+        printInputField(10, 11, bInfo.dwSize.X - 20, "输入存档路径（默认 backup.amz ）：");
+    if (result == "") return "backup.amz";
+    return result;
+}
+
+void UI::printSLMsg(bool isSuccess) {
+    if (!isSuccess)
+        printMessage(center_x - 4, 11, "读写失败。", true);
+    else
+        printMessage(center_x - 4, 11, "读写成功。", false);
+    Sleep(1000);
+}
+
+std::string UI::printInputField(short x, short y, short length, std::string prompt) {
+    setCursorPos(x, y);
+    DWORD buffer;
+    COORD pos{x, y};
+    // 显示光标
+    CONSOLE_CURSOR_INFO cInfo = {1, 1};
+    SetConsoleCursorInfo(hOut, &cInfo);
+
+    // 设置文本框底色
+    FillConsoleOutputAttribute(hOut, 0x80, length, pos, &buffer);
+
+    // 设置提示文本
+    setTextColor(Color::White, Color::Black);
+    std::cout << prompt;
+    std::string result;
+
+    // 获取单行输入
+    setTextColor(Color::White, Color::DarkGrey);
+    std::getline(std::cin, result);
+
+    // 恢复属性
+    FillConsoleOutputAttribute(hOut, 0x0F, length, pos, &buffer);
+    FillConsoleOutputCharacter(hOut, ' ', length, pos, &buffer);
+    setTextColor(Color::White, Color::Black);
+    cInfo.bVisible = 0;
+    SetConsoleCursorInfo(hOut, &cInfo);
+    return result;
+}
+
+void UI::printMessage(short x, short y, std::string text, bool isWarning) {
+    setCursorPos(x, y);
+    COORD pos{x, y};
+    setTextColor(Color::White, isWarning ? Color::Red : Color::Green);
+    std::cout << text;
+    setTextColor(Color::White, Color::Black);
 }
 
 bool UI::generateMove(Chessboard board, Piece piece, Move& move) {

@@ -12,39 +12,35 @@ int main() {
     UI ui;
     int choice;
     while (choice = ui.printMainMenu(), choice != 2) {
+        Amazons amazons;
         if (choice == 0) {
             int mode = ui.printModeMenu();
-            if (mode != 4) {
-                int pauseChoice=0;
-                Amazons amazons((GameMode)mode);
-                do{
-                    amazons.play(&ui);
-                    if(amazons.isOver){
-                        ui.printEnd(amazons.winner);
-                        break;
-                    }
-                    pauseChoice = ui.printPauseMenu();
-                    if(pauseChoice==1){
-                        amazons.save();
-                    }
-                }while(pauseChoice==0);
+            if (mode == 4) continue;
+            amazons.setGameMode(GameMode(mode));
+        } else {
+            std::string path = ui.printSL();
+            if (!amazons.load(path)) {
+                ui.printSLMsg(false);
+                continue;
             }
+            ui.printSLMsg(true);
         }
-        else{
-            Amazons amazons;
-            int pauseChoice=0;
-            do{
-                amazons.play(&ui);
-                if(amazons.isOver){
-                    ui.printEnd(amazons.winner);
+        int pauseChoice;
+        do {
+            amazons.play(&ui);
+            if (amazons.isOver) {
+                ui.printEnd(amazons.winner);
+                break;
+            }
+            while (pauseChoice = ui.printPauseMenu(), pauseChoice == 1) {
+                std::string path = ui.printSL();
+                if (amazons.save(path)) {
+                    ui.printSLMsg(true);
                     break;
                 }
-                pauseChoice = ui.printPauseMenu();
-                if(pauseChoice==1){
-                    amazons.save();
-                }
-            }while(pauseChoice==0);
-        }
+                ui.printSLMsg(false);
+            }
+        } while (pauseChoice == 0);
     }
     return 0;
 }
