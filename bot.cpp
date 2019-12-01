@@ -6,29 +6,36 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+/**************\
+ *   Credits  *
+ **************
+ * Mt_Nomad   *
+ * 12f23eddde *
+\**************/
+
 #include "bot.h"
 
-void Bot::getPos(const Chessboard& map, Player pl, Coordinate pos[4]) {
-    int counter = 0;
+void Bot::getPos(const Chessboard& board, Piece piece, Coordinate pos[4]) {
+    int cnt = 0;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if (int(map.at(i, j)) == int(pl)) {
-                pos[counter].x = i;
-                pos[counter].y = j;
-                counter++;
+            if (int(board.at(i, j)) == int(piece)) {
+                pos[cnt].x = i;
+                pos[cnt].y = j;
+                cnt++;
             }
         }
-        if (counter == 4) break;
+        if (cnt == 4) break;
     }
 }
 
-void Bot::kingMove(Player pl, const Chessboard& map, int kd[8][8]) {
+void Bot::kingMove(Piece piece, const Chessboard& board, int kd[8][8]) {
     std::queue<Coordinate> que;
     // 所有的位置都初始化为无穷大（不可到达）
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++) kd[i][j] = INF;
     Coordinate pos[4];
-    getPos(map, pl, pos);
+    getPos(board, piece, pos);
     // 对每一个棋子进行广度优先搜索
     for (int i = 0; i < 4; i++) {
         // 起点入列
@@ -42,7 +49,7 @@ void Bot::kingMove(Player pl, const Chessboard& map, int kd[8][8]) {
             for (int j = 0; j < 8; j++) {
                 int nx = p.x + dx[j], ny = p.y + dy[j];
                 // 判断是否为空以及是否需要更新（比原先的要小）
-                if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                if (Chessboard::isInside(nx, ny) && board.at(nx, ny) == Square::Empty &&
                     kd[nx][ny] > kd[p.x][p.y] + 1) {
                     // 入列并更新值
                     que.push(Coordinate(nx, ny));
@@ -53,13 +60,13 @@ void Bot::kingMove(Player pl, const Chessboard& map, int kd[8][8]) {
     }
 }
 //对某一个棋盘，计算某一方棋子的Kingmove数
-void Bot::queenMove(Player pl, const Chessboard& map, int qd[8][8]) {
+void Bot::queenMove(Piece piece, const Chessboard& board, int qd[8][8]) {
     std::queue<Coordinate> que;
     // 所有的位置都初始化为无穷大（不可到达）
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++) qd[i][j] = INF;
     Coordinate pos[4];
-    getPos(map, pl, pos);
+    getPos(board, piece, pos);
 
     // 对每一个棋子进行广度优先搜索
     for (int i = 0; i < 4; i++) {
@@ -76,7 +83,7 @@ void Bot::queenMove(Player pl, const Chessboard& map, int qd[8][8]) {
                 for (int step = 1; step < 8; step++) {
                     int nx = p.x + dx[j] * step, ny = p.y + dy[j] * step;
                     // 判断是否为空以及是否需要更新（比原先的要小）
-                    if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                    if (Chessboard::isInside(nx, ny) && board.at(nx, ny) == Square::Empty &&
                         qd[nx][ny] > qd[p.x][p.y] + 1) {
                         // 入列并更新值
                         que.push(Coordinate(nx, ny));
@@ -89,13 +96,13 @@ void Bot::queenMove(Player pl, const Chessboard& map, int qd[8][8]) {
     }
 }
 
-double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
+double Bot::evaluation(Piece piece, const Chessboard& board, int currturns) {
     // search_count++;
     int k_w[8][8], k_b[8][8], q_w[8][8], q_b[8][8];
-    kingMove(Player::Black, map, k_b);
-    kingMove(Player::White, map, k_w);
-    queenMove(Player::Black, map, q_b);
-    queenMove(Player::White, map, q_w);
+    kingMove(Piece::Black, board, k_b);
+    kingMove(Piece::White, board, k_w);
+    queenMove(Piece::Black, board, q_b);
+    queenMove(Piece::White, board, q_w);
 
     // 以白方为己方
     // t1/2:  'territory'
@@ -133,11 +140,11 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
     memset(emptyblocks, 0, sizeof(emptyblocks));
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if (map.at(i, j) == Square::Empty) {
+            if (board.at(i, j) == Square::Empty) {
                 // 记录八个方向上的相邻空格
                 for (int m = 0; m < 8; m++) {
                     if (Chessboard::isInside(i + dx[m], j + dy[m]) &&
-                        map.at(i + dx[m], j + dy[m]) == Square::Empty)
+                        board.at(i + dx[m], j + dy[m]) == Square::Empty)
                         emptyblocks[i][j]++;
                 }
             }
@@ -145,8 +152,8 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
     }
 
     Coordinate pos_black[4], pos_white[4];
-    getPos(map, Player::White, pos_white);
-    getPos(map, Player::Black, pos_black);
+    getPos(board, Piece::White, pos_white);
+    getPos(board, Piece::Black, pos_black);
     // 计算棋子的 'mobility'
     double m_w = 0, m_b = 0;
     // 4个白方棋子
@@ -158,7 +165,7 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
                 // 当前移动到的位置 (nx,ny)
                 int nx = pos_white[j].x + dx[i] * step, ny = pos_white[j].y + dy[i] * step;
                 // 遇到障碍停止
-                if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                if (Chessboard::isInside(nx, ny) && board.at(nx, ny) == Square::Empty &&
                     q_w[nx][ny] != INF) {
                     m_w += (double)emptyblocks[nx][ny] / (double)step;
                 } else
@@ -171,7 +178,7 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
         for (int i = 0; i < 8; i++) {
             for (int step = 1; step < 8; step++) {
                 int nx = pos_black[j].x + dx[i] * step, ny = pos_black[j].y + dy[i] * step;
-                if (Chessboard::isInside(nx, ny) && map.at(nx, ny) == Square::Empty &&
+                if (Chessboard::isInside(nx, ny) && board.at(nx, ny) == Square::Empty &&
                     q_b[nx][ny] != INF) {
                     m_b += (double)emptyblocks[nx][ny] / (double)step;
                 } else
@@ -191,22 +198,22 @@ double Bot::evaluation(Player pl, const Chessboard& map, int currturns) {
     }
 
     // 若黑方为己方返回相反数
-    if (pl == Player::Black)
+    if (piece == Piece::Black)
         return -value;
     else
         return value;
 }
 
-double Bot::PVS(Player pl, Chessboard& map, double alpha, double beta, int depth, int d) {
+double Bot::PVS(Piece piece, Chessboard& board, double alpha, double beta, int depth, int d) {
     if (depth == 0 || 1000 * (std::clock() - start_time) / CLOCKS_PER_SEC >= max_time) {
-        return evaluation(pl, map, (d - depth) / 2);
+        return evaluation(piece, board, (d - depth) / 2);
     }
     Move moves[3000];
     memset(moves, 0, sizeof(moves));
     int pos = 0;
     double value = 0;
     Coordinate pos_color[4];
-    getPos(map, pl, pos_color);
+    getPos(board, piece, pos_color);
 
     pos = 0;
     // 生成子节点
@@ -216,13 +223,13 @@ double Bot::PVS(Player pl, Chessboard& map, double alpha, double beta, int depth
             for (len1 = 1; len1 < 8; len1++) {
                 x1 = pos_color[i].x + dx[k] * len1;
                 y1 = pos_color[i].y + dy[k] * len1;
-                if (map.at(x1, y1) != Square::Empty || !Chessboard::isInside(x1, y1)) break;
+                if (board.at(x1, y1) != Square::Empty || !Chessboard::isInside(x1, y1)) break;
                 for (l = 0; l < 8; l++) {
                     for (len2 = 1; len2 < 8; len2++) {
                         x2 = x1 + dx[l] * len2;
                         y2 = y1 + dy[l] * len2;
                         if (!Chessboard::isInside(x2, y2)) break;
-                        if (map.at(x1, y1) != Square::Empty &&
+                        if (board.at(x1, y1) != Square::Empty &&
                             !(pos_color[i].x == x2 && pos_color[i].y == y2))
                             break;
                         moves[pos].x0 = pos_color[i].x;
@@ -238,29 +245,29 @@ double Bot::PVS(Player pl, Chessboard& map, double alpha, double beta, int depth
     }
     // 若无路可走，游戏结束
     if (pos == 0) {
-        return evaluation(pl, map, (d - depth) / 2);
+        return evaluation(piece, board, (d - depth) / 2);
     }
 
     // 搜索第一步，并假设它是最优秀的走法
     double best;
-    makeMove(moves[0], pl, map);
-    best = -PVS((Player) - int(pl), map, -beta, -alpha, depth - 1, d);
-    unmakeMove(moves[0], pl, map);
+    makeMove(moves[0], piece, board);
+    best = -PVS((Piece) - int(piece), board, -beta, -alpha, depth - 1, d);
+    unmakeMove(moves[0], piece, board);
     if (best > alpha) alpha = best;
 
     for (int i = 1; i < pos; i++) {
-        makeMove(moves[i], pl, map);
-        value = -PVS((Player) - int(pl), map, -best - PVS_width, -best, depth - 1, d);
+        makeMove(moves[i], piece, board);
+        value = -PVS((Piece) - int(piece), board, -best - PVS_width, -best, depth - 1, d);
 
         // 假设验证失败
         if (value >= best + 1 && value < beta)
             //以value作为下界再次搜索
-            best = -PVS((Player) - int(pl), map, -beta, -value, depth - 1, d);
+            best = -PVS((Piece) - int(piece), board, -beta, -value, depth - 1, d);
 
         // 假设验证成功
         else if (value > best)
             best = value;
-        unmakeMove(moves[i], pl, map);
+        unmakeMove(moves[i], piece, board);
 
         // 更新 alpha
         if (best > alpha) alpha = best;
@@ -272,7 +279,7 @@ double Bot::PVS(Player pl, Chessboard& map, double alpha, double beta, int depth
 
 //单独把第一层的搜索做成一个函数 为了预先排序
 //因为第二层大概率搜不完 并且这一层不是返回估值而是走法
-Move Bot::searchStep(Player pl, Chessboard& board) {
+Move Bot::searchStep(Piece piece, Chessboard& board) {
     // Initialize moves' array
     Move moves[3000];
     int pos = 0;
@@ -280,7 +287,7 @@ Move Bot::searchStep(Player pl, Chessboard& board) {
 
     Coordinate pos_color[4];
 
-    getPos(board, pl, pos_color);
+    getPos(board, piece, pos_color);
     // 4枚棋子
     for (int i = 0; i < 4; i++) {
         int x1, y1;  // 棋子落点
@@ -317,9 +324,9 @@ Move Bot::searchStep(Player pl, Chessboard& board) {
                         moves[pos].y2 = y2;
 
                         // 落子，然后计算估值，最后撤回
-                        makeMove(moves[pos], pl, board);
-                        value = evaluation(pl, board, 0);
-                        unmakeMove(moves[pos], pl, board);
+                        makeMove(moves[pos], piece, board);
+                        value = evaluation(piece, board, 0);
+                        unmakeMove(moves[pos], piece, board);
                         moves[pos++].value = value;
                     }
                 }
@@ -335,10 +342,10 @@ Move Bot::searchStep(Player pl, Chessboard& board) {
         // max_depth = d;
         for (t = 0; t < pos; t++) {
             if (1000 * (std::clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
-            makeMove(moves[t], pl, board);
-            value = -PVS(pl, board, -INF, INF, d, d);
+            makeMove(moves[t], piece, board);
+            value = -PVS(piece, board, -INF, INF, d, d);
             moves[t].value = value;
-            unmakeMove(moves[t], pl, board);
+            unmakeMove(moves[t], piece, board);
         }
         std::sort(moves, moves + t, [](Move a, Move b) { return a > b; });
         if (1000 * (std::clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
@@ -346,17 +353,18 @@ Move Bot::searchStep(Player pl, Chessboard& board) {
     return moves[0];
 }
 
-Bot::Bot(Player player) {
+Bot::Bot(Piece piece) {
     PVS_width = 1.25;
-    this->player = player;
+    this->piece = piece;
 }
 
-Move Bot::execute(Chessboard board, int turns) {
+bool Bot::execute(Chessboard board, int turns, Move& move) {
     start_time = std::clock();
     this->turns = turns;
     if (turns == 1)
         max_time = 1960;
     else
         max_time = 960;
-    return searchStep(player, board);
+    move = searchStep(piece, board);
+    return true;
 }

@@ -10,20 +10,34 @@
 #define AMAZONS_H
 
 #include <iostream>
-#include "chessboard.h"
+#include <fstream>
+#include <string>
+#include "bot.h"
+#include "human.h"
 
-enum class GameMode { HumanBot = 0, BotBot = 1, HumanHuman = 2 };
+enum class GameMode { HumanBot = 0, BotHuman = 1, BotBot = 2, HumanHuman = 3 };
 
 class Amazons {
 public:
-    GameMode gameMode;
+    Amazons(GameMode gamemode);
     Amazons();
-    void step(Move move);
+    ~Amazons();
+    bool isOver;
+    Piece winner;
     const Chessboard& getChessboard();
-    bool isOver(Player pl)const;
+    void play(UI* pUi);
+    void save()const;
 
 private:
     Chessboard chessboard;
+    GameMode gameMode;
+    std::string nameBlack;
+    std::string nameWhite;
+    Piece firstHand;
+    int turns;
+    void _play(IPlayer* black, IPlayer* white, UI* pUi);
+    bool canMove(Piece pl) const;
+    void step(Move move);
 };
 
 #endif  // AMAZONS_H

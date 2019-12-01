@@ -13,7 +13,7 @@
 #include <iostream>
 
 enum class Square { Empty = 0, White = 1, Black = -1, Arrow = 2 };
-enum class Player { White = 1, Black = -1 };
+enum class Piece { White = 1, Black = -1 };
 
 class Move {
 public:

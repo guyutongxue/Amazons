@@ -15,7 +15,7 @@ UI::UI() {
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     // 获取控制台信息
     GetConsoleScreenBufferInfo(hOut, &bInfo);
-    center_x = bInfo.dwSize.X / 2 - 9;
+    center_x = bInfo.dwSize.X / 2;
 
     COORD bufSize = {bInfo.dwSize.X, 30};
     SetConsoleScreenBufferSize(hOut, bufSize);
@@ -34,6 +34,12 @@ UI::~UI() {
     CloseHandle(hOut);
 }
 
+int UI::printPauseMenu() {
+    std::string chs[3] = {"1. 继续游戏", "2. 保存游戏", "3. 退出"};
+    short pos[3] = {5, 10, 15};
+    return printMenu("游戏已暂停", chs, pos, 3);
+}
+
 int UI::printMainMenu() {
     std::string chs[3] = {"1. 开始游戏", "2. 读取游戏", "3. 退出"};
     short pos[3] = {5, 10, 15};
@@ -41,9 +47,10 @@ int UI::printMainMenu() {
 }
 
 int UI::printModeMenu() {
-    std::string chs[4] = {"1. 人机对战", "2. 机机对战", "3. 人人对战", "4. 返回"};
-    short pos[4] = {5, 10, 15, 20};
-    return printMenu("选择模式", chs, pos, 4);
+    std::string chs[5] = {"1. 人-机对战", "2. 机-人对战", "3. 机-机对战", "4. 人-人对战",
+                          "5. 返回"};
+    short pos[5] = {6, 9, 12, 15, 18};
+    return printMenu("选择模式", chs, pos, 5);
 }
 
 int UI::printMenu(const std::string& title, std::string* choices, short* pos, int num) {
@@ -90,39 +97,51 @@ int UI::printMenu(const std::string& title, std::string* choices, short* pos, in
     // setPos(center_x-)
 }
 
+void UI::printEnd(Piece winner) {
+    setCursorPos(center_x-10,21);
+    if(winner==Piece::Black)std::cout<<"黑方";
+    else std::cout<<"白方";
+    std::cout<<"胜利。";
+    _getch();
+}
+
 void UI::clearScreen() {
     DWORD buffer;
     for (short i = 0; i < 30; i++) {
         COORD pos = {0, i};
-        FillConsoleOutputAttribute(hOut, 0x0F, bInfo.dwSize.X - 10, pos, &buffer);
-        FillConsoleOutputCharacter(hOut, ' ', bInfo.dwSize.X - 10, pos, &buffer);
+        FillConsoleOutputAttribute(hOut, 0x0F, bInfo.dwSize.X, pos, &buffer);
+        FillConsoleOutputCharacter(hOut, ' ', bInfo.dwSize.X, pos, &buffer);
     }
 }
 
 void UI::printBoardBackground() {
+    clearScreen();
     setTextColor(Color::Black, Color::White);
     for (int i = 0; i < 17; i++) {
-        setCursorPos(center_x - 9, i);
+        setCursorPos(center_x - 17, i + 2);
         std::cout << boardLine[i] << std::endl;
     }
+    setTextColor(Color::White, Color::Black);
 }
 
 void UI::printGame(const Chessboard& board) {
-    setTextColor(Color::Black, Color::White);
     for (int j = 0; j < 8; j++) {
         for (int i = 0; i < 8; i++) {
-            setCursorPos(center_x - 9 + i * 2 + 1, j * 2 + 1);
+            SetConsoleCursorPosition(hOut, getCOORD(i, j));
+            // 使用不同的终端字体时，棋子的宽度不确定。
+            // 故不输出棋子后面的空格
             if (board.at(i, j) == Square::White) {
-                std::cout << "○";
+                std::cout << " ○";
             } else if (board.at(i, j) == Square::Black) {
-                std::cout << "●";
+                std::cout << " ●";
             } else if (board.at(i, j) == Square::Arrow) {
-                std::cout << "×";
-            } else
-                std::cout << " ";
+                std::cout << " ×";
+            } else {
+                std::cout << "   ";
+            }
+            setPosColor(Color::Black, Color::White, i, j);
         }
     }
-    setTextColor(Color::White, Color::Black);
     setCursorPos(center_x - 9, 18);
 }
 
@@ -132,12 +151,20 @@ void UI::printGame(const Chessboard& board, Move lastmove) {
     setPosColor(Color::Black, Color::LightGrey, lastmove.x2, lastmove.y2);
 }
 
-bool UI::generateMove(Chessboard board, Player pl, Move& move) {
+bool UI::generateMove(Chessboard board, Piece piece, Move& move) {
     int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
     int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+    Chessboard backup = board;
     bool avail[8][8];
-    auto isAmazon = [&board, &pl](int x, int y) -> bool {
-        return Chessboard::isInside(x, y) && board.at(x, y) == (Square)pl;
+    auto isAmazon = [&board, &piece, &dx, &dy](int x, int y) -> bool {
+        return Chessboard::isInside(x, y) && board.at(x, y) == (Square)piece && [&](int x, int y) {
+            for (int k = 0; k < 8; k++) {
+                int x1 = x + dx[k];
+                int y1 = y + dy[k];
+                if (Chessboard::isInside(x1, y1) && board.at(x1, y1) == Square::Empty) return true;
+            }
+            return false;
+        }(x, y);
     };
     auto isStep = [&avail](int x, int y) -> bool {
         return Chessboard::isInside(x, y) && avail[x][y];
@@ -155,8 +182,9 @@ bool UI::generateMove(Chessboard board, Player pl, Move& move) {
             setPosColor(Color::Black, recall, x, y);
             switch (keycode) {
                 case 27: {  // Esc
-                    // 底色填充为白色
-                    printGame(board);
+                    // 恢复初始盘面
+                    printGame(backup);
+                    board = backup;
                     return false;
                 }
                 case '8':
@@ -254,21 +282,20 @@ bool UI::generateMove(Chessboard board, Player pl, Move& move) {
     };
     int x, y;
     bool firstFound;
-    Chessboard backup = board;
     do {      // 选择 Arrows 位置的循环（若取消退回）
         do {  // 选择落子位置的循环（若取消退回）
-            // 恢复初始盘面
-            board = backup;
 
             firstFound = false;
             // 获取第一个棋子的位置
             for (y = 0; !firstFound && y < 8; y++) {
                 for (x = 0; !firstFound && x < 8; x++) {
-                    if (isAmazon(x, y)) firstFound = true;
+                    if (isAmazon(x, y)) {
+                        firstFound = true;
+                        move.x0 = x;
+                        move.y0 = y;
+                    }
                 }
             }
-            move.x0 = x - 1;
-            move.y0 = y - 1;
             if (!chooseTarget(move.x0, move.y0, isAmazon, Color::White)) {
                 return false;
             }
@@ -296,7 +323,7 @@ bool UI::generateMove(Chessboard board, Player pl, Move& move) {
             move.y1 = y;
         } while (!chooseTarget(move.x1, move.y1, isStep, Color::LightCyan));
         board.at(move.x0, move.y0) = Square::Empty;
-        board.at(move.x1, move.y1) = Square(pl);
+        board.at(move.x1, move.y1) = Square(piece);
         printGame(board);
 
         firstFound = false;
@@ -338,13 +365,13 @@ void UI::setTextColor(Color foreground, Color background) {
 
 void UI::setPosColor(Color foreground, Color background, short x, short y) {
     DWORD buffer;
-    FillConsoleOutputAttribute(hOut, (int)background << 4 + (int)foreground, 1, getCOORD(x, y),
+    FillConsoleOutputAttribute(hOut, (int)background << 4 + (int)foreground, 3, getCOORD(x, y),
                                &buffer);
 }
 
 COORD UI::getCOORD(short x, short y) {
     COORD r;
-    r.X = center_x - 9 + x * 2 + 1;
-    r.Y = y * 2 + 1;
+    r.X = center_x - 17 + x * 4 + 1;
+    r.Y = 2 + y * 2 + 1;
     return r;
 }

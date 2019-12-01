@@ -11,8 +11,8 @@
 
 #include <conio.h>
 #include <windows.h>
-#include <string>
 #include <functional>
+#include <string>
 #include "chessboard.h"
 
 class UI {
@@ -22,9 +22,11 @@ public:
     void printBoardBackground();
     void printGame(const Chessboard& board);
     void printGame(const Chessboard& board, Move lastmove);
-    bool generateMove(Chessboard board, Player pl,Move& move);
+    bool generateMove(Chessboard board, Piece piece, Move& move);
     int printMainMenu();
     int printModeMenu();
+    int printPauseMenu();
+    void printEnd(Piece winner);
 
 private:
     HANDLE hOut;
@@ -50,24 +52,28 @@ private:
     short center_x;
     void clearScreen();
     void setCursorPos(short x, short y);
-    void setPosColor(Color foreground, Color background,short x,short y);
+    void setPosColor(Color foreground, Color background, short x, short y);
     void setTextColor(Color foreground, Color background);
     /**
      * @brief 在某一棋盘中，用户通过键盘选择某一种格子。
      * @param board 要选择的棋盘
      * @param target 要选择的格子种类
-     * @param x 格子坐标 x 
+     * @param x 格子坐标 x
      * @param y 格子坐标 y
      * @return 空
      */
-    void chooseTarget(const Chessboard& board, Square target,int& x,int& y);
+    void chooseTarget(const Chessboard& board, Square target, int& x, int& y);
     int printMenu(const std::string& title, std::string* choices, short* pos, int num);
     constexpr static const char* boardLine[17] = {
-        "┌─┬─┬─┬─┬─┬─┬─┬─┐", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
-        "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
-        "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
-        "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │", "├─┼─┼─┼─┼─┼─┼─┼─┤", "│ │ │ │ │ │ │ │ │",
-        "└─┴─┴─┴─┴─┴─┴─┴─┘"};
+        "┌───┬───┬───┬───┬───┬───┬───┬───┐", "│   │   │   │   │   │   │   │   │",
+        "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
+        "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
+        "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
+        "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
+        "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
+        "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
+        "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
+        "└───┴───┴───┴───┴───┴───┴───┴───┘"};
     COORD getCOORD(short x, short y);
 };
 

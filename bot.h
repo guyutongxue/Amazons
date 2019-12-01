@@ -13,16 +13,16 @@
 #include <cstring>
 #include <ctime>
 #include <queue>
-#include "chessboard.h"
+#include "iplayer.h"
 
-class Bot {
+class Bot : public IPlayer {
 public:
-    Bot(Player player);
-    Move execute(Chessboard board, int turns);
-    Player player;
+    Bot(Piece piece);
+    bool execute(Chessboard board, int turns, Move& move)override;
 
 private:
     class Coordinate;
+    Piece piece;
 
     // DeltaX/Y of eight direction
     constexpr static const int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
@@ -54,19 +54,19 @@ private:
         0.2;  //先手优势（计算 'territory' 时用到的参数 k ）
     // typedef std::pair<int, int> PAIR;
     constexpr static const int INF = INT16_MAX;
-    void getPos(const Chessboard& map, Player pl, Coordinate pos[4]);
-    Move searchStep(Player pl, Chessboard& board);
+    void getPos(const Chessboard& map, Piece piece, Coordinate pos[4]);
+    Move searchStep(Piece piece, Chessboard& board);
     //对某一个棋盘，计算某一方棋子的queenmove数
-    void queenMove(Player pl, const Chessboard& map, int qd[8][8]);
+    void queenMove(Piece piece, const Chessboard& map, int qd[8][8]);
 
     //对某一个棋盘，计算某一方棋子的Kingmove数
-    void kingMove(Player pl, const Chessboard& map, int kd[8][8]);
+    void kingMove(Piece piece, const Chessboard& map, int kd[8][8]);
 
-    double evaluation(Player pl, const Chessboard& board, const int turns);
+    double evaluation(Piece piece, const Chessboard& board, const int turns);
 
     /**
      * @brief 使用 PVS 算法取得当前节点的估值。
-     * @param pl    执棋玩家。
+     * @param piece    执棋玩家。
      * @param map   当前棋盘。
      * @param alpha 下界 alpha 。
      * @param beta  上界 beta 。
@@ -74,7 +74,7 @@ private:
      * @param d     总深度。
      * @return 取得的估值大小。
      */
-    double PVS(Player pl, Chessboard& map, double alpha, double beta, int depth, int d);
+    double PVS(Piece piece, Chessboard& map, double alpha, double beta, int depth, int d);
 
     int turns;
     std::clock_t start_time;
@@ -85,25 +85,25 @@ private:
     inline int pow2(int n) {
         return n >= 31 ? INT_MAX : 1 << n;
     }
-    
+
     /**
      * @brief 在某棋盘上执行某一落子。
      * @param a 要执行的落子信息。
-     * @param pl 执棋玩家。
+     * @param piece 执棋玩家。
      * @param board 当前棋盘。
      * @return 空。
-    */
-    inline void makeMove(Move a, Player pl, Chessboard& board) {
+     */
+    inline void makeMove(Move a, Piece piece, Chessboard& board) {
         board.at(a.x0, a.y0) = Square::Empty;
-        board.at(a.x1, a.y1) = (Square)pl;
+        board.at(a.x1, a.y1) = (Square)piece;
         board.at(a.x2, a.y2) = Square::Arrow;
     }
 
     //恢复到上一步
-    inline void unmakeMove(Move a, Player pl, Chessboard& board) {
+    inline void unmakeMove(Move a, Piece piece, Chessboard& board) {
         board.at(a.x1, a.y1) = Square::Empty;
         board.at(a.x2, a.y2) = Square::Empty;
-        board.at(a.x0, a.y0) = (Square)pl;
+        board.at(a.x0, a.y0) = (Square)piece;
     }
 };
 
