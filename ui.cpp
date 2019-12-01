@@ -15,6 +15,8 @@ UI::UI() {
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     // 获取控制台信息
     GetConsoleScreenBufferInfo(hOut, &bInfo);
+
+    if (bInfo.dwSize.X < 80) bInfo.dwSize.X = 80;
     center_x = bInfo.dwSize.X / 2;
 
     COORD bufSize = {bInfo.dwSize.X, 30};
@@ -35,18 +37,29 @@ UI::~UI() {
 }
 
 int UI::printPauseMenu() {
-    std::string chs[3] = {"1. 继续游戏", "2. 保存游戏", "3. 退出"};
-    short pos[3] = {5, 10, 15};
+    clearScreen();
+    for (int i = 0; i < 5; i++) {
+        setCursorPos(center_x - 17, i + 3);
+        std::cout << graphicPaused[i];
+    }
+    std::string chs[3] = {"1. 继续游戏", "2. 保存游戏", "3. 结束游戏"};
+    short pos[3] = {12, 15, 18};
     return printMenu("游戏已暂停", chs, pos, 3);
 }
 
 int UI::printMainMenu() {
+    clearScreen();
+    for (int i = 0; i < 6; i++) {
+        setCursorPos(center_x - 27, i + 3);
+        std::cout << graphicTitle[i];
+    }
     std::string chs[3] = {"1. 开始游戏", "2. 读取游戏", "3. 退出"};
-    short pos[3] = {5, 10, 15};
+    short pos[3] = {12, 15, 18};
     return printMenu("亚马逊棋", chs, pos, 3);
 }
 
 int UI::printModeMenu() {
+    clearScreen();
     std::string chs[5] = {"1. 人-机对战", "2. 机-人对战", "3. 机-机对战", "4. 人-人对战",
                           "5. 返回"};
     short pos[5] = {6, 9, 12, 15, 18};
@@ -54,10 +67,10 @@ int UI::printModeMenu() {
 }
 
 int UI::printMenu(const std::string& title, std::string* choices, short* pos, int num) {
-    clearScreen();
     setTextColor(Color::White, Color::Black);
     setCursorPos(center_x - 4, 0);
     std::cout << title;
+    printMenuHelp();
     for (int i = 0; i < num; i++) {
         setCursorPos(center_x - 6, pos[i]);
         std::cout << choices[i];
@@ -99,12 +112,16 @@ int UI::printMenu(const std::string& title, std::string* choices, short* pos, in
 }
 
 void UI::printEnd(Piece winner) {
+    DWORD buffer;
+    COORD pos = {0, 0};
+    FillConsoleOutputAttribute(hOut, 0x0F, bInfo.dwSize.X, pos, &buffer);
     setCursorPos(center_x - 10, 21);
     if (winner == Piece::Black)
         std::cout << "黑方";
     else
         std::cout << "白方";
     std::cout << "胜利。";
+    printEndHelp();
     _getch();
 }
 
@@ -117,12 +134,16 @@ void UI::clearScreen() {
     }
 }
 
-void UI::printBoardBackground() {
+void UI::printBoardBackground(std::string black,std::string white) {
     clearScreen();
+    setCursorPos(0, 0);
+    std::cout << "黑方：" << black;
+    setCursorPos(bInfo.dwSize.X - 15, 0);
+    std::cout << "白方：" << white;
     setTextColor(Color::Black, Color::White);
     for (int i = 0; i < 17; i++) {
         setCursorPos(center_x - 17, i + 2);
-        std::cout << boardLine[i] << std::endl;
+        std::cout << boardLine[i];
     }
     setTextColor(Color::White, Color::Black);
 }
@@ -155,17 +176,18 @@ void UI::printGame(const Chessboard& board, Move lastmove) {
 }
 
 std::string UI::printSL() {
+    printInputHelp();
     std::string result =
-        printInputField(10, 11, bInfo.dwSize.X - 20, "输入存档路径（默认 backup.amz ）：");
+        printInputField(10, 16, bInfo.dwSize.X - 20, "输入存档路径（默认 backup.amz ）：");
     if (result == "") return "backup.amz";
     return result;
 }
 
 void UI::printSLMsg(bool isSuccess) {
     if (!isSuccess)
-        printMessage(center_x - 4, 11, "读写失败。", true);
+        printMessage(center_x - 4, 16, "读写失败。", true);
     else
-        printMessage(center_x - 4, 11, "读写成功。", false);
+        printMessage(center_x - 4, 16, "读写成功。", false);
     Sleep(1000);
 }
 
@@ -204,6 +226,70 @@ void UI::printMessage(short x, short y, std::string text, bool isWarning) {
     setTextColor(Color::White, isWarning ? Color::Red : Color::Green);
     std::cout << text;
     setTextColor(Color::White, Color::Black);
+}
+
+void UI::printHelpHeader() {
+    COORD pos = {0, 23};
+    DWORD buffer;
+    FillConsoleOutputCharacter(hOut, ' ', bInfo.dwSize.X * 6, pos, &buffer);
+    setCursorPos(0, 23);
+    std::cout << helpTitle;
+}
+
+void UI::printMenuHelp() {
+    printHelpHeader();
+    std::cout << "使用[上键][下键]切换选项，按下[回车键]确定。\n";
+    std::cout << "也可以按下[数字键]选择对应选项。" << std::endl;
+}
+
+void UI::printInputHelp() {
+    printHelpHeader();
+    std::cout << "按下[回车键]确定。" << std::endl;
+}
+
+void UI::printCalcHelp() {
+    printHelpHeader();
+    std::cout << "正在博弈中......请耐心等待。" << std::endl;
+}
+
+void UI::printMoveHelp(int status) {
+    printHelpHeader();
+    std::cout << "使用任意下列三组按键来控制";
+    switch (status) {
+        case 1: {
+            std::cout << "移动的棋子。\n";
+            break;
+        }
+        case 2: {
+            std::cout << "移动的终点。\n";
+            break;
+        }
+        case 3: {
+            std::cout << " Arrow 的位置。\n";
+            break;
+        }
+    }
+    std::cout << " 7 8 9  |  Q W E  |    ^\n";
+    std::cout << " 4   6  |  A   D  |  <   >\n";
+    std::cout << " 1 2 3  |  Z S C  |    v\n";
+    std::cout << "按下[回车键]确定，按下[ESC]" << (status == 1 ? "暂停。" : "取消。") << std::endl;
+}
+
+void UI::printEndHelp() {
+    printHelpHeader();
+    std::cout << "按下任意键返回主菜单。" << std::endl;
+}
+
+void UI::switchPlayers(Piece piece) {
+    DWORD buffer;
+    COORD pos = {0, 0};
+    FillConsoleOutputAttribute(hOut, 0x0F, bInfo.dwSize.X, pos, &buffer);
+    if (piece == Piece::Black)
+        FillConsoleOutputAttribute(hOut, 0xF0, 15, pos, &buffer);
+    else {
+        pos.X = bInfo.dwSize.X - 15;
+        FillConsoleOutputAttribute(hOut, 0xF0, 15, pos, &buffer);
+    }
 }
 
 bool UI::generateMove(Chessboard board, Piece piece, Move& move) {
@@ -341,6 +427,7 @@ bool UI::generateMove(Chessboard board, Piece piece, Move& move) {
         do {  // 选择落子位置的循环（若取消退回）
 
             firstFound = false;
+            printMoveHelp(1);
             // 获取第一个棋子的位置
             for (y = 0; !firstFound && y < 8; y++) {
                 for (x = 0; !firstFound && x < 8; x++) {
@@ -357,6 +444,7 @@ bool UI::generateMove(Chessboard board, Piece piece, Move& move) {
             printGame(board);
 
             firstFound = false;
+            printMoveHelp(2);
             std::memset(avail, false, sizeof(avail));
             for (int i = 0; i < 8; i++) {
                 for (int len = 1; len < 8; len++) {
@@ -382,6 +470,7 @@ bool UI::generateMove(Chessboard board, Piece piece, Move& move) {
         printGame(board);
 
         firstFound = false;
+        printMoveHelp(3);
         std::memset(avail, false, sizeof(avail));
         for (int i = 0; i < 8; i++) {
             for (int len = 1; len < 8; len++) {

@@ -10,32 +10,32 @@
 
 Amazons::Amazons() {
     chessboard = Chessboard::start;
-    gameMode=GameMode::BotHuman;
+    gameMode = GameMode::BotHuman;
     firstHand = Piece::Black;
     isOver = false;
     turns = 1;
 }
 
-void Amazons::setGameMode(GameMode gamemode){
-    gameMode=gamemode;
+void Amazons::setGameMode(GameMode gamemode) {
+    gameMode = gamemode;
 }
 
-bool Amazons::load(std::string path){
-    std::ifstream input(path,std::ios::binary);
-    if(input.fail())return false;
-    char a,b;
-    for(int i=0;i<8;i++){
-        for(int j=0;j<8;j++){
-            input>>a;
-            chessboard.at(i,j)=(Square)(int(a));
+bool Amazons::load(std::string path) {
+    std::ifstream input(path, std::ios::binary);
+    if (input.fail()) return false;
+    char a, b;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            input >> a;
+            chessboard.at(i, j) = (Square)(int(a));
         }
     }
-    input>>a>>b;
-    gameMode=(GameMode)(int(a));
-    firstHand=(Piece)(int(b));
-    input.read((char*)&turns,sizeof(int));
+    input >> a >> b;
+    gameMode = (GameMode)(int(a));
+    firstHand = (Piece)(int(b));
+    input.read((char*)&turns, sizeof(int));
     input.close();
-    isOver=false;
+    isOver = false;
     return true;
 }
 
@@ -86,6 +86,8 @@ void Amazons::play(UI* pUi) {
         case GameMode::HumanBot: {
             Human* human = new Human(Piece::Black, pUi);
             Bot* bot = new Bot(Piece::White);
+            nameBlack = "您";
+            nameWhite = "Bot";
             _play(human, bot, pUi);
             delete human;
             delete bot;
@@ -94,6 +96,8 @@ void Amazons::play(UI* pUi) {
         case GameMode::BotHuman: {
             Bot* bot = new Bot(Piece::Black);
             Human* human = new Human(Piece::White, pUi);
+            nameBlack = "Bot";
+            nameWhite = "您";
             _play(bot, human, pUi);
             delete human;
             delete bot;
@@ -102,6 +106,8 @@ void Amazons::play(UI* pUi) {
         case GameMode::BotBot: {
             Bot* bot1 = new Bot(Piece::Black);
             Bot* bot2 = new Bot(Piece::White);
+            nameBlack = "Bot 1";
+            nameWhite = "Bot 2";
             _play(bot1, bot2, pUi);
             delete bot1;
             delete bot2;
@@ -110,6 +116,8 @@ void Amazons::play(UI* pUi) {
         case GameMode::HumanHuman: {
             Human* human1 = new Human(Piece::Black, pUi);
             Human* human2 = new Human(Piece::White, pUi);
+            nameBlack = "玩家1";
+            nameWhite = "玩家2";
             _play(human1, human2, pUi);
             delete human1;
             delete human2;
@@ -121,7 +129,7 @@ void Amazons::play(UI* pUi) {
 void Amazons::_play(IPlayer* black, IPlayer* white, UI* pUi) {
     Move move;
     IPlayer* current = black;
-    pUi->printBoardBackground();
+    pUi->printBoardBackground(nameBlack, nameWhite);
     pUi->printGame(chessboard);
     while (true) {
         if (!canMove(firstHand)) {
@@ -130,6 +138,8 @@ void Amazons::_play(IPlayer* black, IPlayer* white, UI* pUi) {
             isOver = true;
             return;
         }
+        pUi->switchPlayers(firstHand);
+        pUi->printCalcHelp();
         if (!current->execute(chessboard, turns, move)) return;
         step(move);
         pUi->printGame(chessboard, move);
@@ -146,7 +156,7 @@ void Amazons::_play(IPlayer* black, IPlayer* white, UI* pUi) {
 
 bool Amazons::save(std::string path) const {
     std::ofstream output(path, std::ios::binary | std::ios::trunc);
-    if(output.fail())return false;
+    if (output.fail()) return false;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             output << char(int(chessboard.at(i, j)));

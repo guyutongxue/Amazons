@@ -19,16 +19,21 @@ class UI {
 public:
     UI();
     ~UI();
-    void printBoardBackground();
+    void printBoardBackground(std::string black,std::string white);
     void printGame(const Chessboard& board);
     void printGame(const Chessboard& board, Move lastmove);
     bool generateMove(Chessboard board, Piece piece, Move& move);
+
     int printMainMenu();
     int printModeMenu();
     int printPauseMenu();
+
+    void printCalcHelp();
     std::string printSL();
     void printSLMsg(bool isSuccess);
     void printEnd(Piece winner);
+    
+    void switchPlayers(Piece piece);
 
 private:
     HANDLE hOut;
@@ -56,7 +61,7 @@ private:
     void setCursorPos(short x, short y);
     void setPosColor(Color foreground, Color background, short x, short y);
     void setTextColor(Color foreground, Color background);
-    
+
     /**
      * @brief 在某一棋盘中，用户通过键盘选择某一种格子。
      * @param board 要选择的棋盘
@@ -67,8 +72,15 @@ private:
      */
     void chooseTarget(const Chessboard& board, Square target, int& x, int& y);
     int printMenu(const std::string& title, std::string* choices, short* pos, int num);
-    std::string printInputField(short x,short y,short length,std::string prompt);
-    void printMessage(short x,short y,std::string text,bool isWarning);
+    std::string printInputField(short x, short y, short length, std::string prompt);
+    void printMessage(short x, short y, std::string text, bool isWarning);
+
+    void printHelpHeader();
+    void printMenuHelp();
+    void printInputHelp();
+    void printMoveHelp(int status);
+    void printEndHelp();
+
     constexpr static const char* boardLine[17] = {
         "┌───┬───┬───┬───┬───┬───┬───┬───┐", "│   │   │   │   │   │   │   │   │",
         "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
@@ -79,6 +91,20 @@ private:
         "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
         "├───┼───┼───┼───┼───┼───┼───┼───┤", "│   │   │   │   │   │   │   │   │",
         "└───┴───┴───┴───┴───┴───┴───┴───┘"};
+    constexpr static const char* graphicTitle[6] = {
+        R"*(           __  __           __________  _   _  _____ )*",
+        R"*(     /\   |  \/  |   /\    |___  / __ \| \ | |/ ____|)*",
+        R"*(    /  \  | \  / |  /  \      / / |  | |  \| | (___  )*",
+        R"*(   / /\ \ | |\/| | / /\ \    / /| |  | | . ` |\___ \ )*",
+        R"*(  / ____ \| |  | |/ ____ \  / /_| |__| | |\  |____) |)*",
+        R"*( /_/    \_\_|  |_/_/    \_\/_____\____/|_| \_|_____/ )*",};
+    constexpr static const char* graphicPaused[5]={
+        R"*(  ____                          _ )*",
+        R"*( |  _ \ __ _ _   _ ___  ___  __| |)*",
+        R"*( | |_) / _` | | | / __|/ _ \/ _` |)*",
+        R"*( |  __/ (_| | |_| \__ \  __/ (_| |)*",
+        R"*( |_|   \__,_|\__,_|___/\___|\__,_|)*"};
+    constexpr static const char* helpTitle="----------------||帮助||----------------\n";
     COORD getCOORD(short x, short y);
 };
 
