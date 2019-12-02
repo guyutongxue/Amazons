@@ -362,7 +362,7 @@ bool Bot::execute(Chessboard board, int turns, Move& move) {
     if (turns == 1)
         max_time = 1960;
     else
-        max_time = 960;
+        max_time = 1960;
     move = searchStep(piece, board);
     return true;
 }
