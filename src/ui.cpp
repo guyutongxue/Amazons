@@ -113,7 +113,7 @@ void UI::printEnd(Piece winner) {
     DWORD buffer;
     COORD pos = {0, 0};
     FillConsoleOutputAttribute(hOut, 0x0F, bInfo.dwSize.X, pos, &buffer);
-    setCursorPos(center_x - 10, 21);
+    setCursorPos(center_x - 5, 21);
     if (winner == Piece::Black)
         std::cout << "黑方";
     else
