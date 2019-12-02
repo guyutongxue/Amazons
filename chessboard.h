@@ -12,38 +12,120 @@
 #include <cstring>
 #include <iostream>
 
-enum class Square { Empty = 0, White = 1, Black = -1, Arrow = 2 };
-enum class Piece { White = 1, Black = -1 };
+/**
+ * @brief 棋子枚举类。
+ * 表示棋盘上某一坐标的状态：
+ * 空位、黑棋、白棋、 Arrow 。
+ */
+enum class Square {
+    Empty = 0,  /**< 空位  */
+    White = 1,  /**< 白棋  */
+    Black = -1, /**< 黑棋  */
+    Arrow = 2   /**< Arrow */
+};
 
+/**
+ * @brief 执棋方枚举类。
+ * 表示某一执棋方所执棋子颜色。
+ */
+enum class Piece {
+    White = 1, /**< 白棋，白方 */
+    Black = -1 /**< 黑棋，黑方 */
+};
+
+/**
+ * @brief 落子类。
+ * 表示某次落子的起点、终点和 Arrow 位置。
+ * 对友元类 @c Bot 提供估值。
+ */
 class Move {
 public:
     int x0, y0;
     int x1, y1;
     int x2, y2;
     friend class Bot;
+
+    /**
+     * @brief 比较落子之间的估值。
+     * 用于计算机执棋时的算法。
+     * @bool 左侧操作数是否大于右侧操作数。
+     */
     bool operator>(Move b) {
         return value > b.value;
     }
-    Move(){
-        x0=x1=x2=y0=y1=y2=0;
+
+    /**
+     * @brief 默认构造函数。
+     * 初始化为 0 。
+     */
+    Move() {
+        x0 = x1 = x2 = y0 = y1 = y2 = 0;
     }
 
 private:
     double value;
 };
 
+/**
+ * @brief 棋盘类。
+ * 表示某一棋盘状态。
+ */
 class Chessboard {
 public:
+    /**
+     * @brief 默认构造函数。
+     * 将棋盘全部初始化为空位。
+     */
     Chessboard();
+
+    /**
+     * @brief 拷贝构造函数。
+     * 将棋盘各个位置拷贝初始化。
+     */
     Chessboard(const Chessboard& origin);
+
+    /**
+     * @brief 从二维数组构造函数。
+     * 将棋盘各个位置依照数组中元素的值初始化。
+     */
     Chessboard(const int (&origin)[8][8]);
+
+    /**
+     * @brief 静态成员，存储开局棋盘。
+     */
     static const Chessboard start;
+
+    /**
+     * @brief 赋值运算符重载。
+     * 将棋盘各个位置按照源的各个赋值。
+     * @param src 源棋盘。
+     * @return 当前棋盘的引用。
+     */
     Chessboard& operator=(const Chessboard& src);
+
+    /**
+     * @brief 读写棋盘上某一坐标的状态。
+     * @param x X 坐标。
+     * @param y Y 坐标。
+     * @return (x,y) 处的坐标状态的引用。
+     */
     Square& at(int x, int y);
+
+    /**
+     * @brief 读取棋盘上某一坐标的状态。
+     * 此函数重载不得写入。
+     * @param x X 坐标。
+     * @param y Y 坐标。
+     * @return (x,y) 处的坐标状态。
+     */
     const Square& at(int x, int y) const;
-    void print();
-    
-    // 判断是否在棋盘内
+
+    /**
+     * @brief 静态函数，判断某一棋子坐标是否合法。
+     * @param x X 坐标。
+     * @param y Y 坐标。
+     * @return 该坐标是否合法。
+    */
     inline static bool isInside(int x, int y) {
         return x >= 0 && x < 8 && y >= 0 && y < 8;
     }

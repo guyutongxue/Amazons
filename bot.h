@@ -15,10 +15,32 @@
 #include <queue>
 #include "iplayer.h"
 
+/**
+ * @brief 计算机玩家类。
+ * 继承 @c IPlayer 接口，并通过算法实现整体估值，搜索最优解。
+ */
 class Bot : public IPlayer {
 public:
+    /**
+     * @brief 通过执棋方构造函数。
+     * @param piece 计算机玩家的执棋方。
+     */
     Bot(Piece piece);
-    bool execute(Chessboard board, int turns, Move& move)override;
+
+    /**
+     * @brief 默认析构函数。（空）
+     */
+    ~Bot();
+
+    /**
+     * @brief 执行计算机玩家的决策。
+     * 实现 @c IPlayer 执行决策的纯虚函数。
+     * @param board 当前棋盘状态。
+     * @param turns 当前游戏回合数。
+     * @param move [out] 计算机玩家决定的落子。
+     * @return 是否成功决策。永远返回真。
+     */
+    bool execute(Chessboard board, int turns, Move& move) override;
 
 private:
     class Coordinate;

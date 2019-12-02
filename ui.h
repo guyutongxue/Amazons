@@ -15,27 +15,116 @@
 #include <string>
 #include "chessboard.h"
 
+/**
+ * @brief 用户交互界面类。
+ * 提供近似图形化的用户交互界面。
+ * 负责打印菜单、棋盘和帮助，读取用户落子等。
+ */
 class UI {
 public:
+    /**
+     * @brief 默认构造函数。
+     * 获取控制台句柄，并设置代码页，光标和缓冲区属性。
+     */
     UI();
+
+    /**
+     * @brief 默认析构函数。
+     * 关闭控制台句柄。
+     */
     ~UI();
-    void printBoardBackground(std::string black,std::string white);
+
+    /**
+     * @brief 打印棋盘背景。
+     * 打印棋盘背景和玩家名。
+     * @param black 黑方玩家名。
+     * @param white 白方玩家名。
+     */
+    void printBoardBackground(std::string black, std::string white);
+
+    /**
+     * @brief 打印棋子。
+     * 将棋盘中的棋子打印到正确的位置上。
+     * @param board 要打印的棋盘。
+     */
     void printGame(const Chessboard& board);
+
+    /**
+     * @brief 打印棋子和落子。
+     * 将棋盘中的棋子打印到正确的位置上，同时标记上一步落子。
+     * @param board 要打印的棋盘。
+     * @param lastmove 要打印的上一步落子。
+     */
     void printGame(const Chessboard& board, Move lastmove);
+
+    /**
+     * @brief 读取人类玩家落子。
+     * 通过键盘输入和高亮显示读取人类玩家落子。
+     * @param board 将要落子的棋盘。
+     * @param piece 人类玩家所操控的执棋方。
+     * @param move [out] 读取到的落子。
+     * @return 是否成功落子。若人类玩家选择暂停，返回假。
+     */
     bool generateMove(Chessboard board, Piece piece, Move& move);
 
+    /**
+     * @brief 打印主菜单界面。
+     * @return 选中并确定的菜单选项序号，从 0 开始。
+     */
     int printMainMenu();
+
+    /**
+     * @brief 打印选择模式菜单界面。
+     * @return 选中并确定的菜单选项序号，从 0 开始。
+     */
     int printModeMenu();
+
+    /**
+     * @brief 打印暂停菜单界面。
+     * @return 选中并确定的菜单选项序号，从 0 开始。
+     */
     int printPauseMenu();
 
-    void printCalcHelp();
+    
+
+    /**
+     * @brief 打印读取/保存输入框。
+     * 在屏幕特定位置打印输入提示和输入栏。
+     * @return 输入的字符串。
+    */
     std::string printSL();
+
+    /**
+     * @brief 打印读取/保存结果提示框。
+     * 若读写成功，弹出绿色提示文字；
+     * 若读写失败，弹出红色提示文字。
+     * 提示框持续一秒。
+     * @param isSuccess 是否读取成功。
+     */
     void printSLMsg(bool isSuccess);
+
+    /**
+     * @brief 打印游戏结束界面。
+     * 保留棋盘终局的同时，打印游戏结果和帮助提示。
+     * @param winner 游戏胜利执棋方。
+     */
     void printEnd(Piece winner);
+
+    /**
+     * @brief 打印关于界面。
+    */
     void printAbout();
 
+    /**
+     * @brief 切换玩家名高亮显示。
+    */
     void switchPlayers(Piece piece);
 
+    /**
+     * @brief 打印执棋中的帮助提示。
+     * 只在计算机落子时显示。
+    */
+    void printCalcHelp();
 private:
     HANDLE hOut;
     CONSOLE_SCREEN_BUFFER_INFO bInfo;
@@ -98,20 +187,19 @@ private:
         R"*(    /  \  | \  / |  /  \      / / |  | |  \| | (___  )*",
         R"*(   / /\ \ | |\/| | / /\ \    / /| |  | | . ` |\___ \ )*",
         R"*(  / ____ \| |  | |/ ____ \  / /_| |__| | |\  |____) |)*",
-        R"*( /_/    \_\_|  |_/_/    \_\/_____\____/|_| \_|_____/ )*",};
-    constexpr static const char* graphicPaused[5]={
+        R"*( /_/    \_\_|  |_/_/    \_\/_____\____/|_| \_|_____/ )*",
+    };
+    constexpr static const char* graphicPaused[5] = {
         R"*(  ____                          _ )*",
         R"*( |  _ \ __ _ _   _ ___  ___  __| |)*",
         R"*( | |_) / _` | | | / __|/ _ \/ _` |)*",
         R"*( |  __/ (_| | |_| \__ \  __/ (_| |)*",
         R"*( |_|   \__,_|\__,_|___/\___|\__,_|)*"};
-    constexpr static const char* helpTitle="----------------||帮助||----------------\n";
-    constexpr static const char* aboutText[4]={
-        "亚马逊棋游戏，由谷雨同学制作，版本 0.1.0。 ",
-        "基于 Windows 平台及 MinGW 环境开发。",
+    constexpr static const char* helpTitle = "----------------||帮助||----------------\n";
+    constexpr static const char* aboutText[4] = {
+        "亚马逊棋游戏，由谷雨同学制作，版本 0.1.0。 ", "基于 Windows 平台及 MinGW 环境开发。",
         "本项目遵守 Mozilla 公共许可协议 2.0 的条款；",
-        "您可以在这里获取源代码：https://github.com/Guyutongxue/Amazons 。"
-    };
+        "您可以在这里获取源代码：https://github.com/Guyutongxue/Amazons 。"};
     COORD getCOORD(short x, short y);
 };
 

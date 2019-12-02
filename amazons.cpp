@@ -46,10 +46,6 @@ bool Amazons::load(std::string path) {
 
 Amazons::~Amazons() {}
 
-const Chessboard& Amazons::getChessboard() {
-    return chessboard;
-}
-
 void Amazons::step(Move move) {
     chessboard.at(move.x1, move.y1) = chessboard.at(move.x0, move.y0);
     chessboard.at(move.x0, move.y0) = Square::Empty;

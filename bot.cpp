@@ -368,3 +368,5 @@ bool Bot::execute(Chessboard board, int turns, Move& move) {
     move = searchStep(piece, board);
     return true;
 }
+
+Bot::~Bot() {}
