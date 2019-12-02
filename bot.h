@@ -53,7 +53,7 @@ private:
     constexpr static const double firstHandAdvantage =
         0.2;  //先手优势（计算 'territory' 时用到的参数 k ）
     // typedef std::pair<int, int> PAIR;
-    constexpr static const int INF = INT16_MAX;
+    constexpr static const int INF = INT_MAX;
     void getPos(const Chessboard& map, Piece piece, Coordinate pos[4]);
     Move searchStep(Piece piece, Chessboard& board);
     //对某一个棋盘，计算某一方棋子的queenmove数
