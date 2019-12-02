@@ -46,10 +46,18 @@ doxygen
 - 可中途暂停并保存游戏到文件
 - 可从文件读取游戏并继续
 - 详细的帮助提示
-- 基于 Mozilla Public License v2.0 的开源生态
+- 基于 [Mozilla 公共许可协议 2.0](http://mozilla.org/MPL/2.0/) 的开源生态
+
+## 关于人类玩家
+
+此程序使用键盘控制人类玩家的落子。它提供了三组按键用于选择、移动、发射棋子，切合不同用户的习惯。
 
 ## 关于计算机玩家
 
 正如之前所说，本项目内置了计算机玩家 `Bot` ，采用 PVS 搜索算法进行决策。如需查看相关资料，可以访问[这里](https://github.com/Guyutongxue/Amazons/blob/master/algorithm.md)。请注意，这个 Markdown 文件采用了较多数学公式，为了更好的阅读体验，请下载并使用支持 [MathJax](https://www.mathjax.org/) 或 [KaTeX](https://katex.org/) 的软件阅读。
 
 请注意，本项目的计算机玩家 `Bot` 不参加 [Botzone](https://www.botzone.org.cn/) 天梯对局。这是因为，处于结构化程序的设计， `Bot` 的算法完全使用对象包装，导致运算时间开销过大，不适合参加比赛。不过，我已将 `Bot` 的核心算法进行面向过程的等价重构，改造为 `KSSBot` 参加天梯对局。可以通过我的用户名 `Guyutongxue` 找到该 Bot 。`KSSBot` 暂时不开放源代码。
+
+## 声明
+
+本项目遵守 Mozilla 公共许可协议 2.0 的条款。这意味着，*您的*任何*修改*不得删除或更改适用软件的源代码形式中包含的任何许可证声明，否则将终止本许可授予*您的*权利。
