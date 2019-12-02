@@ -1,10 +1,8 @@
-/**
- * Copyright (c) 2019 Guyutongxue
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+// Copyright (c) 2019 Guyutongxue
+// 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef BOT_H
 #define BOT_H
@@ -37,7 +35,7 @@ public:
      * 实现 @c IPlayer 执行决策的纯虚函数。
      * @param board 当前棋盘状态。
      * @param turns 当前游戏回合数。
-     * @param move [out] 计算机玩家决定的落子。
+     * @param[out] move 计算机玩家决定的落子。
      * @return 是否成功决策。永远返回真。
      */
     bool execute(Chessboard board, int turns, Move& move) override;
@@ -113,7 +111,6 @@ private:
      * @param a 要执行的落子信息。
      * @param piece 执棋玩家。
      * @param board 当前棋盘。
-     * @return 空。
      */
     inline void makeMove(Move a, Piece piece, Chessboard& board) {
         board.at(a.x0, a.y0) = Square::Empty;
@@ -129,13 +126,26 @@ private:
     }
 };
 
+/**
+ * @brief 坐标类。
+*/
 class Bot::Coordinate {
 public:
-    int x;
-    int y;
+    int x; /**< X 坐标。 */
+    int y; /**< Y 坐标。 */
+    /**
+     * @brief 默认构造函数。
+     * 初始化为 (0,0) 。
+    */
     Coordinate() {
         x = y = 0;
     }
+
+    /**
+     * @brief 基于数值的构造函数。
+     * @param x X 坐标。
+     * @param y Y 坐标。
+    */
     Coordinate(int x, int y) {
         this->x = x;
         this->y = y;

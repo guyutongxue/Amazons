@@ -50,6 +50,7 @@ _deps
 *.exe
 *.out
 *.app
+build/
 
 ###########
 # VS Code #
@@ -57,9 +58,9 @@ _deps
 
 .vscode
 
-#############
-# Reference #
-#############
+########
+# Misc #
+########
 
 reference
 sample
@@ -69,3 +70,9 @@ sample
 ###################
 
 *.amz
+
+###########
+# Doxygen #
+###########
+
+doc/

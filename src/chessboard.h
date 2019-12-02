@@ -1,10 +1,8 @@
-/**
- * Copyright (c) 2019 Guyutongxue
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+// Copyright (c) 2019 Guyutongxue
+// 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef CHECKBOARD_H
 #define CHECKBOARD_H
@@ -40,15 +38,18 @@ enum class Piece {
  */
 class Move {
 public:
-    int x0, y0;
-    int x1, y1;
-    int x2, y2;
+    int x0; /**< 落子起点 X 坐标。 */
+    int y0; /**< 落子起点 Y 坐标。 */
+    int x1; /**< 落子终点 X 坐标。 */
+    int y1; /**< 落子终点 Y 坐标。 */
+    int x2; /**< Arrow X 坐标。    */
+    int y2; /**< Arrow Y 坐标。    */
     friend class Bot;
 
     /**
      * @brief 比较落子之间的估值。
      * 用于计算机执棋时的算法。
-     * @bool 左侧操作数是否大于右侧操作数。
+     * @return 左侧操作数是否大于右侧操作数。
      */
     bool operator>(Move b) {
         return value > b.value;

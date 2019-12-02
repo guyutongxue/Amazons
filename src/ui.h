@@ -1,10 +1,8 @@
-/**
- * Copyright (c) 2019 Guyutongxue
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+// Copyright (c) 2019 Guyutongxue
+// 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef UI_H
 #define UI_H
@@ -62,7 +60,7 @@ public:
      * 通过键盘输入和高亮显示读取人类玩家落子。
      * @param board 将要落子的棋盘。
      * @param piece 人类玩家所操控的执棋方。
-     * @param move [out] 读取到的落子。
+     * @param[out] move 读取到的落子。
      * @return 是否成功落子。若人类玩家选择暂停，返回假。
      */
     bool generateMove(Chessboard board, Piece piece, Move& move);
