@@ -53,9 +53,9 @@ int UI::printMainMenu() {
         setCursorPos(center_x - 27, i + 3);
         std::cout << graphicTitle[i];
     }
-    std::string chs[3] = {"1. 开始游戏", "2. 读取游戏", "3. 退出"};
-    short pos[3] = {12, 15, 18};
-    return printMenu("亚马逊棋", chs, pos, 3);
+    std::string chs[4] = {"1. 开始游戏", "2. 读取游戏", "3. 关于","4. 退出"};
+    short pos[4] = {12, 15, 18, 21};
+    return printMenu("亚马逊棋", chs, pos, 4);
 }
 
 int UI::printModeMenu() {
@@ -121,6 +121,18 @@ void UI::printEnd(Piece winner) {
     else
         std::cout << "白方";
     std::cout << "胜利。";
+    printEndHelp();
+    _getch();
+}
+
+void UI::printAbout(){
+    clearScreen();
+    setCursorPos(center_x-2,10);
+    std::cout<<"关于";
+    for(int i=0;i<4;i++){
+        setCursorPos(center_x-25,13+i);
+        std::cout<<aboutText[i];
+    }
     printEndHelp();
     _getch();
 }

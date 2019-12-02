@@ -22,18 +22,23 @@ void Amazons::setGameMode(GameMode gamemode) {
 
 bool Amazons::load(std::string path) {
     std::ifstream input(path, std::ios::binary);
+    input.unsetf(std::ios_base::skipws);
     if (input.fail()) return false;
-    char a, b;
+    unsigned char a, b;
+    // Magic Numbers
+    input>>a>>b;
+    if (a != (unsigned char)0xAA || b != (unsigned char)0x20) return false;
+    signed char c,d;
+    input >> c >> d;
+    gameMode = (GameMode)(int(c));
+    firstHand = (Piece)(int(d));
+    input.read((char*)&turns, sizeof(int));
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            input >> a;
-            chessboard.at(i, j) = (Square)(int(a));
+            input >> c;
+            chessboard.at(i, j) = (Square)(int(c));
         }
     }
-    input >> a >> b;
-    gameMode = (GameMode)(int(a));
-    firstHand = (Piece)(int(b));
-    input.read((char*)&turns, sizeof(int));
     input.close();
     isOver = false;
     return true;
@@ -157,13 +162,16 @@ void Amazons::_play(IPlayer* black, IPlayer* white, UI* pUi) {
 bool Amazons::save(std::string path) const {
     std::ofstream output(path, std::ios::binary | std::ios::trunc);
     if (output.fail()) return false;
+    // Magic Numbers
+    output <<(unsigned char)0xAA << (unsigned char)0x20;
+
+    output << (signed char)(int)gameMode << (signed char)(int)firstHand;
+    output.write((char*)&turns, sizeof(int));
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            output << char(int(chessboard.at(i, j)));
+            output << (signed char)(int)chessboard.at(i, j);
         }
     }
-    output << char(int(gameMode)) << char(int(firstHand));
-    output.write((char*)&turns, sizeof(int));
     output.close();
     return true;
 }

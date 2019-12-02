@@ -11,7 +11,11 @@
 int main() {
     UI ui;
     int choice;
-    while (choice = ui.printMainMenu(), choice != 2) {
+    while (choice = ui.printMainMenu(), choice != 3) {
+        if(choice==2){
+            ui.printAbout();
+            continue;
+        }
         Amazons amazons;
         if (choice == 0) {
             int mode = ui.printModeMenu();
