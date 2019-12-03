@@ -1,5 +1,5 @@
 // Copyright (c) 2019 Guyutongxue
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -24,9 +24,9 @@ bool Amazons::load(std::string path) {
     if (input.fail()) return false;
     unsigned char a, b;
     // Magic Numbers
-    input>>a>>b;
+    input >> a >> b;
     if (a != (unsigned char)0xAA || b != (unsigned char)0x20) return false;
-    signed char c,d;
+    signed char c, d;
     input >> c >> d;
     gameMode = (GameMode)(int(c));
     firstHand = (Piece)(int(d));
@@ -37,7 +37,6 @@ bool Amazons::load(std::string path) {
             chessboard.at(i, j) = (Square)(int(c));
         }
     }
-    input.close();
     isOver = false;
     return true;
 }
@@ -83,51 +82,43 @@ bool Amazons::canMove(Piece pl) const {
 void Amazons::play(UI* pUi) {
     switch (gameMode) {
         case GameMode::HumanBot: {
-            Human* human = new Human(Piece::Black, pUi);
-            Bot* bot = new Bot(Piece::White);
+            std::shared_ptr<Human> human(new Human(Piece::Black, pUi));
+            std::shared_ptr<Bot> bot(new Bot(Piece::White));
             nameBlack = "您";
             nameWhite = "Bot";
             _play(human, bot, pUi);
-            delete human;
-            delete bot;
             break;
         }
         case GameMode::BotHuman: {
-            Bot* bot = new Bot(Piece::Black);
-            Human* human = new Human(Piece::White, pUi);
+            std::shared_ptr<Bot> bot(new Bot(Piece::Black));
+            std::shared_ptr<Human> human(new Human(Piece::White, pUi));
             nameBlack = "Bot";
             nameWhite = "您";
             _play(bot, human, pUi);
-            delete human;
-            delete bot;
             break;
         }
         case GameMode::BotBot: {
-            Bot* bot1 = new Bot(Piece::Black);
-            Bot* bot2 = new Bot(Piece::White);
+            std::shared_ptr<Bot> bot1(new Bot(Piece::Black));
+            std::shared_ptr<Bot> bot2(new Bot(Piece::White));
             nameBlack = "Bot 1";
             nameWhite = "Bot 2";
             _play(bot1, bot2, pUi);
-            delete bot1;
-            delete bot2;
             break;
         }
         case GameMode::HumanHuman: {
-            Human* human1 = new Human(Piece::Black, pUi);
-            Human* human2 = new Human(Piece::White, pUi);
+            std::shared_ptr<Human> human1(new Human(Piece::Black, pUi));
+            std::shared_ptr<Human> human2(new Human(Piece::White, pUi));
             nameBlack = "玩家1";
             nameWhite = "玩家2";
             _play(human1, human2, pUi);
-            delete human1;
-            delete human2;
             break;
         }
     }
 }
 
-void Amazons::_play(IPlayer* black, IPlayer* white, UI* pUi) {
+void Amazons::_play(std::shared_ptr<IPlayer> black, std::shared_ptr<IPlayer> white, UI* pUi) {
     Move move;
-    IPlayer* current = black;
+    std::shared_ptr<IPlayer> current = black;
     pUi->printBoardBackground(nameBlack, nameWhite);
     pUi->printGame(chessboard);
     while (true) {
@@ -157,7 +148,7 @@ bool Amazons::save(std::string path) const {
     std::ofstream output(path, std::ios::binary | std::ios::trunc);
     if (output.fail()) return false;
     // Magic Numbers
-    output <<(unsigned char)0xAA << (unsigned char)0x20;
+    output << (unsigned char)0xAA << (unsigned char)0x20;
 
     output << (signed char)(int)gameMode << (signed char)(int)firstHand;
     output.write((char*)&turns, sizeof(int));
@@ -166,6 +157,5 @@ bool Amazons::save(std::string path) const {
             output << (signed char)(int)chessboard.at(i, j);
         }
     }
-    output.close();
     return true;
 }

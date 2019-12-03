@@ -23,6 +23,11 @@ public:
     Human(Piece piece, UI* pUi);
 
     /**
+     * @brief 默认析构函数。（空）
+     */
+    ~Human();
+
+    /**
      * @brief 执行人类玩家的决策。
      * 实现 @c IPlayer 执行决策的纯虚函数。
      * @param board 当前棋盘状态。

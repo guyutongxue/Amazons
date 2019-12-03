@@ -72,7 +72,6 @@ private:
                                             0.0346, 0.0274, 0.0190, 0.0097, 0};
     constexpr static const double firstHandAdvantage =
         0.2;  //先手优势（计算 'territory' 时用到的参数 k ）
-    // typedef std::pair<int, int> PAIR;
     constexpr static const int INF = INT_MAX;
     void getPos(const Chessboard& map, Piece piece, Coordinate pos[4]);
     Move searchStep(Piece piece, Chessboard& board);

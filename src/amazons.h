@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <memory>
 #include "bot.h"
 #include "human.h"
 
@@ -88,7 +89,7 @@ private:
     std::string nameWhite;
     Piece firstHand;
     int turns;
-    void _play(IPlayer* black, IPlayer* white, UI* pUi);
+    void _play(std::shared_ptr<IPlayer> black, std::shared_ptr<IPlayer> white, UI* pUi);
     bool canMove(Piece pl) const;
     void step(Move move);
 };
