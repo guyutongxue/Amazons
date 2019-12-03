@@ -57,7 +57,7 @@ void Bot::kingMove(Piece piece, const Chessboard& board, int kd[8][8]) {
         }
     }
 }
-//对某一个棋盘，计算某一方棋子的Kingmove数
+
 void Bot::queenMove(Piece piece, const Chessboard& board, int qd[8][8]) {
     std::queue<Coordinate> que;
     // 所有的位置都初始化为无穷大（不可到达）
@@ -275,10 +275,7 @@ double Bot::PVS(Piece piece, Chessboard& board, double alpha, double beta, int d
     return best;
 }
 
-//单独把第一层的搜索做成一个函数 为了预先排序
-//因为第二层大概率搜不完 并且这一层不是返回估值而是走法
 Move Bot::searchStep(Piece piece, Chessboard& board) {
-    // Initialize moves' array
     Move moves[3000];
     int pos = 0;
     double value = 0;
@@ -337,7 +334,6 @@ Move Bot::searchStep(Piece piece, Chessboard& board) {
     int t = 0;
     // 尝试搜索10层
     for (int d = 1; d < 10; d++) {
-        // max_depth = d;
         for (t = 0; t < pos; t++) {
             if (1000 * (std::clock() - start_time) / CLOCKS_PER_SEC >= max_time) break;
             makeMove(moves[t], piece, board);

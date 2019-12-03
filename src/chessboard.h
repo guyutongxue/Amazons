@@ -134,6 +134,8 @@ public:
     friend class Bot;
 
 private:
+
+    /** 保存棋盘各个位置的状态的数组。 */
     Square board[8][8];
 };
 
