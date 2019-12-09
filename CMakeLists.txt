@@ -9,7 +9,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 PROJECT(amazons)
 
 IF(CMAKE_GENERATOR MATCHES "Visual Studio.*")
-    ADD_COMPILE_OPTIONS(/UTF-8)
+    ADD_COMPILE_OPTIONS(/utf-8)
 ELSE()
     SET(CMAKE_CXX_STANDARD 17)
     ADD_COMPILE_OPTIONS(-static-libstdc++ -finput-charset=UTF-8 -fexec-charset=UTF-8)

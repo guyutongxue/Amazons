@@ -7,6 +7,9 @@
 #ifndef UI_H
 #define UI_H
 
+// 取消 windows.h 中对 min,max 的定义，以防与 std::min,std::max 冲突
+#define NOMINMAX
+
 #include <conio.h>
 #include <windows.h>
 #include <functional>
