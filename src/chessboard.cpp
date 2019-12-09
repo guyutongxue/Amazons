@@ -1,5 +1,5 @@
 // Copyright (c) 2019 Guyutongxue
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -31,7 +31,10 @@ const Square& Chessboard::at(int x, int y) const {
     return board[x][y];
 }
 
-const Chessboard Chessboard::start =
-    (int[8][8]){{0, 0, -1, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}, {-1, 0, 0, 0, 0, 0, 0, 1},
-                {0, 0, 0, 0, 0, 0, 0, 0},  {0, 0, 0, 0, 0, 0, 0, 0}, {-1, 0, 0, 0, 0, 0, 0, 1},
-                {0, 0, 0, 0, 0, 0, 0, 0},  {0, 0, -1, 0, 0, 1, 0, 0}};
+const Chessboard Chessboard::getStart() {
+    int start[8][8] = {{0, 0, -1, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},
+                       {-1, 0, 0, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 0},
+                       {0, 0, 0, 0, 0, 0, 0, 0},  {-1, 0, 0, 0, 0, 0, 0, 1},
+                       {0, 0, 0, 0, 0, 0, 0, 0},  {0, 0, -1, 0, 0, 1, 0, 0}};
+    return Chessboard(start);
+}

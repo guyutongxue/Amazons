@@ -92,9 +92,10 @@ public:
     Chessboard(const int (&origin)[8][8]);
 
     /**
-     * @brief 静态成员，存储开局棋盘。
+     * @brief 静态成员函数，返回开局棋盘状态。
+     * @return 开局棋盘状态。
      */
-    static const Chessboard start;
+    static const Chessboard getStart();
 
     /**
      * @brief 赋值运算符重载。

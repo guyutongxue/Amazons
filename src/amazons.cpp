@@ -7,7 +7,7 @@
 #include "amazons.h"
 
 Amazons::Amazons() {
-    chessboard = Chessboard::start;
+    chessboard = Chessboard::getStart();
     gameMode = GameMode::BotHuman;
     firstHand = Piece::Black;
     isOver = false;
@@ -82,32 +82,32 @@ bool Amazons::canMove(Piece pl) const {
 void Amazons::play(UI* pUi) {
     switch (gameMode) {
         case GameMode::HumanBot: {
-            std::shared_ptr<Human> human(new Human(Piece::Black, pUi));
-            std::shared_ptr<Bot> bot(new Bot(Piece::White));
+            auto human=std::make_shared<Human>(Piece::Black, pUi);
+            auto bot=std::make_shared<Bot>(Piece::White);
             nameBlack = "您";
             nameWhite = "Bot";
             _play(human, bot, pUi);
             break;
         }
         case GameMode::BotHuman: {
-            std::shared_ptr<Bot> bot(new Bot(Piece::Black));
-            std::shared_ptr<Human> human(new Human(Piece::White, pUi));
+            auto bot=std::make_shared<Bot>(Piece::Black);
+            auto human=std::make_shared<Human>(Piece::White, pUi);
             nameBlack = "Bot";
             nameWhite = "您";
             _play(bot, human, pUi);
             break;
         }
         case GameMode::BotBot: {
-            std::shared_ptr<Bot> bot1(new Bot(Piece::Black));
-            std::shared_ptr<Bot> bot2(new Bot(Piece::White));
+            auto bot1=std::make_shared<Bot>(Piece::Black);
+            auto bot2=std::make_shared<Bot>(Piece::White);
             nameBlack = "Bot 1";
             nameWhite = "Bot 2";
             _play(bot1, bot2, pUi);
             break;
         }
         case GameMode::HumanHuman: {
-            std::shared_ptr<Human> human1(new Human(Piece::Black, pUi));
-            std::shared_ptr<Human> human2(new Human(Piece::White, pUi));
+            auto human1=std::make_shared<Human>(Piece::Black, pUi);
+            auto human2=std::make_shared<Human>(Piece::White, pUi);
             nameBlack = "玩家1";
             nameWhite = "玩家2";
             _play(human1, human2, pUi);
