@@ -7,9 +7,6 @@
 #ifndef UI_H
 #define UI_H
 
-// 取消 windows.h 中对 min,max 的定义，以防与 std::min,std::max 冲突
-#define NOMINMAX
-
 #include <conio.h>
 #include <windows.h>
 #include <functional>
@@ -170,7 +167,7 @@ private:
 
     /** 关于界面的文字。 */
     constexpr static const char* aboutText[4] = {
-        "亚马逊棋游戏，由谷雨同学制作，版本 0.1.2 。", "基于 Windows 平台及 MinGW 环境开发。",
+        "亚马逊棋游戏，由谷雨同学制作，版本 0.1.3 。", "基于 Windows 平台及 MinGW 环境开发。",
         "本项目遵守 Mozilla 公共许可协议 2.0 的条款；",
         "您可以在这里获取源代码：https://github.com/Guyutongxue/Amazons 。"};
 
