@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
                 continue;
             }
             ui.printSLMsg(true);
-            playLoop(amazons, ui);
         }
+        playLoop(amazons, ui);
     }
     return 0;
 }
