@@ -8,6 +8,9 @@
 #define UI_H
 
 #include <conio.h>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #include <functional>
 #include <string>
