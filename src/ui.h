@@ -1,5 +1,5 @@
 // Copyright (c) 2019 Guyutongxue
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -83,13 +83,11 @@ public:
      */
     int printPauseMenu();
 
-    
-
     /**
      * @brief 打印读取/保存输入框。
      * 在屏幕特定位置打印输入提示和输入栏。
      * @return 输入的字符串。
-    */
+     */
     std::string printSL();
 
     /**
@@ -110,22 +108,26 @@ public:
 
     /**
      * @brief 打印关于界面。
-    */
+     */
     void printAbout();
 
     /**
      * @brief 切换玩家名高亮显示。
-    */
+     */
     void switchPlayers(Piece piece);
 
     /**
      * @brief 打印执棋中的帮助提示。
      * 只在计算机落子时显示。
-    */
+     */
     void printCalcHelp();
 
-private:
+    /**
+     * @brief 清空控制台屏幕缓冲区。
+     */
+    void clearScreen();
 
+private:
     /** 控制台输出句柄。  */
     HANDLE hOut;
 
@@ -167,7 +169,7 @@ private:
 
     /** 关于界面的文字。 */
     constexpr static const char* aboutText[4] = {
-        "亚马逊棋游戏，由谷雨同学制作，版本 0.1.3 。", "基于 Windows 平台及 MinGW 环境开发。",
+        "亚马逊棋游戏，由谷雨同学制作，版本 0.1.4 。", "基于 Windows 平台及 MinGW 环境开发。",
         "本项目遵守 Mozilla 公共许可协议 2.0 的条款；",
         "您可以在这里获取源代码：https://github.com/Guyutongxue/Amazons 。"};
 
@@ -176,31 +178,26 @@ private:
      * 控制控制台字体颜色时使用。
      */
     enum class Color {
-        Black,         /**< 黑     */
-        Blue,          /**< 蓝     */
-        Green,         /**< 绿     */
-        Cyan,          /**< 青     */
-        Red,           /**< 红     */
-        Magenta,       /**< 洋红   */
-        Brown,         /**< 棕     */
-        LightGrey,     /**< 淡灰   */
-        DarkGrey,      /**< 深灰   */
-        LightBlue,     /**< 淡蓝   */
-        LightGreen,    /**< 淡绿   */
-        LightCyan,     /**< 淡青   */
-        LightRed,      /**< 淡红   */
-        LightMagenta,  /**< 淡洋红 */
-        Yellow,        /**< 黄     */
-        White          /**< 白     */
+        Black,        /**< 黑     */
+        Blue,         /**< 蓝     */
+        Green,        /**< 绿     */
+        Cyan,         /**< 青     */
+        Red,          /**< 红     */
+        Magenta,      /**< 洋红   */
+        Brown,        /**< 棕     */
+        LightGrey,    /**< 淡灰   */
+        DarkGrey,     /**< 深灰   */
+        LightBlue,    /**< 淡蓝   */
+        LightGreen,   /**< 淡绿   */
+        LightCyan,    /**< 淡青   */
+        LightRed,     /**< 淡红   */
+        LightMagenta, /**< 淡洋红 */
+        Yellow,       /**< 黄     */
+        White         /**< 白     */
     };
 
     /** 标记控制台中心 X 坐标。 */
     short center_x;
-
-    /**
-     * @brief 清空控制台屏幕缓冲区。
-     */
-    void clearScreen();
 
     /**
      * @brief 设置控制台光标的坐标。
@@ -274,7 +271,7 @@ private:
      * @brief 打印结束界面帮助。
      */
     void printEndHelp();
-    
+
     /**
      * @brief 设置棋盘上某坐标位置的颜色
      * 注意此函数设置的是棋盘坐标而非控制台坐标。
@@ -284,7 +281,7 @@ private:
      * @param y 棋盘 Y 坐标。
      */
     void setPosColor(Color foreground, Color background, short x, short y);
-    
+
     /**
      * @brief 获取棋盘某坐标对应的控制台坐标。
      * @param x 棋盘 X 坐标。

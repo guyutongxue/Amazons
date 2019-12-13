@@ -142,6 +142,7 @@ void UI::clearScreen() {
         FillConsoleOutputAttribute(hOut, 0x0F, bInfo.dwSize.X, pos, &buffer);
         FillConsoleOutputCharacter(hOut, ' ', bInfo.dwSize.X, pos, &buffer);
     }
+    setCursorPos(0,0);
 }
 
 void UI::printBoardBackground(std::string black,std::string white) {

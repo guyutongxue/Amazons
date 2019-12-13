@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
         }
         playLoop(amazons, ui);
     }
+    ui.clearScreen();
     return 0;
 }
 
