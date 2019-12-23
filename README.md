@@ -64,7 +64,7 @@ doxygen
 
 ## 关于计算机玩家
 
-正如之前所说，本项目内置了计算机玩家 `Bot` ，采用 PVS 搜索算法进行决策。如需查看相关资料，可以访问[这里](https://github.com/Guyutongxue/Amazons/blob/master/algorithm.md)。请注意，这个 Markdown 文件采用了较多数学公式，为了更好的阅读体验，请下载并使用支持 [MathJax](https://www.mathjax.org/) 或 [KaTeX](https://katex.org/) 的软件阅读。
+正如之前所说，本项目内置了计算机玩家 `Bot` ，采用 PVS 搜索算法进行决策。如需查看相关资料，可以访问[这里](algorithm.md)。请注意，这个 Markdown 文件采用了较多数学公式，为了更好的阅读体验，请下载并使用支持 [MathJax](https://www.mathjax.org/) 或 [KaTeX](https://katex.org/) 的软件阅读。
 
 请注意，本项目的计算机玩家 `Bot` 不参加 [Botzone](https://www.botzone.org.cn/) 天梯对局。这是因为，出于结构化程序的设计， `Bot` 的算法完全使用对象包装，导致运算时间开销过大，不适合参加比赛。不过，我已将 `Bot` 的核心算法进行面向过程的等价重构，改造为 `KSSBot` 参加天梯对局。可以通过我的用户名 `Guyutongxue` 找到该 Bot 。`KSSBot` 暂时不开放源代码。
 
