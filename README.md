@@ -1,5 +1,7 @@
 # 2019年北京大学计算概论 A 大作业——亚马逊棋
 
+[![Build Status](https://travis-ci.org/Guyutongxue/Amazons.svg?branch=master)](https://travis-ci.org/Guyutongxue/Amazons)
+
 ## 简介
 
 根据作业要求，我实现了“亚马逊棋”这一简单游戏的计算机程序。本程序运行于 Windows 平台上，全部采用 C++ 语言实现。作为控制台程序，本项目没有调用任何图形化界面库。
